@@ -32,7 +32,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             console.log(`Mã OTP đã được gửi đến email ${data.email}.`);
             onSuccess(data); // Chuyển sang bước 2 và truyền data tạm thời
         } catch (err) {
-            setError((err as any).response?.data?.message || (err as Error).message || "Lỗi gửi OTP.");
+            const resp = (err as any).response?.data;
+            setError(resp || (err as Error).message || "Lỗi gửi OTP.");
         }
     };
 

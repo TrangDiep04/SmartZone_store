@@ -28,7 +28,8 @@ const FinalRegistration: React.FC<FinalRegistrationProps> = ({ formData, onCompl
                 // Chờ 1.5 giây trước khi chuyển hướng
                 setTimeout(onComplete, 1500); 
             } catch (err) {
-                setError((err as any).response?.data?.message || (err as Error).message || "Lỗi hoàn tất đăng ký.");
+                const resp = (err as any).response?.data;
+                setError(resp || (err as Error).message || "Lỗi hoàn tất đăng ký.");
                 setStatus('Hoàn tất đăng ký thất bại.');
             }
         };

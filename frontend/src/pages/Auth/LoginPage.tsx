@@ -9,12 +9,6 @@ const LoginPage: React.FC = () => {
     const { login, isLoggedIn } = useAuth();
     const navigate = useNavigate();
 
-    // Nếu đã đăng nhập, chuyển hướng ngay
-    if (isLoggedIn) {
-         const role = localStorage.getItem('userRole');
-         if (role === 'Admin') navigate('/admin/dashboard', { replace: true });
-         else navigate('/user/dashboard', { replace: true });
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

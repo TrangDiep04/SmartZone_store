@@ -19,7 +19,8 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ tenDangNhap, email, o
             console.log("Xác thực OTP thành công! Đang hoàn tất đăng ký...");
             onSuccess(); // Chuyển sang bước 3 (Hoàn tất)
         } catch (err) {
-            setError((err as any).response?.data?.message || (err as Error).message || "Mã OTP không hợp lệ.");
+            const resp = (err as any).response?.data;
+            setError(resp || (err as Error).message || "Mã OTP không hợp lệ.");
         }
     };
 

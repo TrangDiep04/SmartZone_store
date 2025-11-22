@@ -12,24 +12,38 @@ interface UserData {
 
 // Định nghĩa kiểu dữ liệu cho phản hồi đăng nhập
 interface LoginResponse {
-    token: string;
-    phanQuyen: 'Admin' | 'User';
+    // Backend currently returns these fields (no token, role is 'vaiTro')
+    trangThai?: string;
+    maKhachHang?: number | string;
+    tenDangNhap?: string;
+    vaiTro?: 'Admin' | 'User';
 }
 
 const API_URL = 'http://localhost:8080/api/auth/'; 
 
 // Hàm Đăng nhập
-const login = async (tenDangNhap: string, matKhau: string): Promise<LoginResponse> => {
+const login = async (tenDangNhap: string, matKhau: string): Promise<{ token?: string; phanQuyen: 'Admin' | 'User' }> => {
     try {
         const response = await axios.post<LoginResponse>(API_URL + 'login', { tenDangNhap, matKhau });
-        
-        if (response.data.token) {
-            localStorage.setItem('userToken', response.data.token);
-            localStorage.setItem('userRole', response.data.phanQuyen);
+        const data = response.data;
+
+        // Backend uses `vaiTro` for role and doesn't return a token currently.
+        const role: 'Admin' | 'User' = (data.vaiTro as 'Admin' | 'User') || 'User';
+
+        // Store role in localStorage so AuthContext can initialize from it
+        localStorage.setItem('userRole', role);
+
+        // If backend later provides a token (or we map maKhachHang -> token), store it here
+        if ((data as any).token) {
+            localStorage.setItem('userToken', (data as any).token);
+        } else if (data.maKhachHang) {
+            // optional: keep the id as a lightweight token
+            localStorage.setItem('userToken', String(data.maKhachHang));
         }
-        return response.data;
+
+        return { token: localStorage.getItem('userToken') || undefined, phanQuyen: role };
     } catch (error) {
-        throw (error as any).response?.data?.message || "Đăng nhập thất bại.";
+        throw (error as any).response?.data || "Đăng nhập thất bại.";
     }
 };
 
