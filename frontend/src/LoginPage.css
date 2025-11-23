@@ -1,0 +1,82 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #dce9f6; /* Màu nền cho toàn bộ trang */
+}
+
+.auth-container {
+    max-width: 350px; /* Tăng chiều rộng của container */
+    margin: auto;
+    padding: 55px; /* Tăng đệm bên trong */
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    background-color: #fbfbfb; /* Màu nền cho container */
+    text-align: center; /* Căn giữa văn bản */
+}
+
+.logo {
+    width: 80px; /* Kích thước logo */
+    margin-bottom: 0px;
+}
+.logo-container {
+    margin-bottom: 0px; /* Khoảng cách dưới logo */
+}
+
+
+h2 {
+    color: #010438;
+    margin-bottom: 20px;
+}
+
+.login-form,
+.register-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Căn giữa các trường */
+}
+
+.input-field {
+    width: 100%;  /* Sử dụng tỷ lệ để đảm bảo cân đối */
+    max-width: 200px; /* Giới hạn chiều rộng tối đa của trường */
+    margin-bottom: 10px; /* Khoảng cách giữa các trường */
+}
+
+input {
+    width: 100%; /* Chiếm toàn bộ chiều rộng của phần tử cha */
+    padding: 10px; /* Đệm bên trong lớn hơn */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.85rem; /* Kích thước chữ lớn hơn */
+}
+
+input:focus {
+    border-color: #66afe9; /* Màu viền khi focus */
+    outline: none; /* Bỏ viền khi focus */
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.submit-button {
+    padding: 10px; /* Tăng kích thước nút */
+    margin-top: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85 rem; /* Kích thước chữ lớn hơn */
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    max-width: 170px; /* Chiều rộng tối đa cho nút bấm */
+    transition: background-color 0.3s; /* Hiệu ứng chuyển màu khi hover */
+}
+
+.submit-button:hover {
+    background-color: #4c68f3; /* Màu nền khi hover */
+}

@@ -1,53 +1,72 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import useAuth from '../../hooks/useAuth'; // Đã đổi tên thành .ts
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth"; // Đã đổi tên thành .ts
+import "../../LoginPage.css"; // Đảm bảo bạn có file này
 
 const LoginPage: React.FC = () => {
-    const [tenDangNhap, setTenDangNhap] = useState<string>('');
-    const [matKhau, setMatKhau] = useState<string>('');
-    const [error, setError] = useState<string | null>(null);
-    const { login, isLoggedIn } = useAuth();
-    const navigate = useNavigate();
+  const [tenDangNhap, setTenDangNhap] = useState<string>("");
+  const [matKhau, setMatKhau] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
+    try {
+      const role = await login(tenDangNhap, matKhau);
 
-        try {
-            const role = await login(tenDangNhap, matKhau); 
+      if (role === "Admin") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate("/user/dashboard", { replace: true });
+      }
+    } catch (err: unknown) {
+      const errorMessage =
+        typeof err === "string" ? err : "Đăng nhập thất bại. Vui lòng thử lại.";
+      setError(errorMessage);
+    }
+  };
 
-            if (role === 'Admin') {
-                navigate('/admin/dashboard', { replace: true });
-            } else {
-                navigate('/user/dashboard', { replace: true });
-            }
-
-        } catch (err: unknown) {
-            const errorMessage = typeof err === 'string' 
-                ? err 
-                : "Đăng nhập thất bại. Vui lòng thử lại.";
-            setError(errorMessage); 
-        }
-    };
-
-    return (
-        <div className="auth-container">
-            <h2>Đăng Nhập Hệ Thống</h2>
-            <form onSubmit={handleSubmit}>
-                <input type="text" placeholder="Tên đăng nhập" 
-                       value={tenDangNhap} onChange={(e) => setTenDangNhap(e.target.value)} required />
-                <input type="password" placeholder="Mật khẩu" 
-                       value={matKhau} onChange={(e) => setMatKhau(e.target.value)} required />
-                
-                {error && <div className="error-message">{error}</div>}
-                <button type="submit">Đăng Nhập</button>
-            </form>
-            <p style={{marginTop: '20px'}}>
-                Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
-            </p>
+  return (
+    <div className="auth-container">
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSORrlt2auZR3ziF7XRwl9EpaOA-IKSny9JMw&s"
+        alt="Logo"
+        className="logo"
+      />
+      <h2>Đăng Nhập</h2>
+      <form onSubmit={handleSubmit} className="login-form">
+        <div className="input-field">
+          <input
+            type="text"
+            placeholder="Tên đăng nhập"
+            value={tenDangNhap}
+            onChange={(e) => setTenDangNhap(e.target.value)}
+            required
+          />
         </div>
-    );
+        <div className="input-field">
+          <input
+            type="password"
+            placeholder="Mật khẩu"
+            value={matKhau}
+            onChange={(e) => setMatKhau(e.target.value)}
+            required
+          />
+        </div>
+
+        {error && <div className="error-message">{error}</div>}
+        <button type="submit" className="submit-button">
+          Đăng Nhập
+        </button>
+      </form>
+      <p className="register-link">
+        Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
+      </p>
+    </div>
+  );
 };
 
 export default LoginPage;

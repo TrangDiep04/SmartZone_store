@@ -36,7 +36,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ tenDangNhap, email, o
                 required 
             />
             {error && <div className="error-message">{error}</div>}
-            <button type="submit">Xác thực Mã OTP (Bước 2/3)</button>
+            <button type="submit">Xác thực Mã OTP</button>
         </form>
     );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import authService from '../../api/authService'; // Đã đổi tên thành .ts
+import authService from '../../api/authService';
 
 interface RegisterData {
     tenDangNhap: string;
@@ -39,15 +39,30 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
     return (
         <form onSubmit={handleSubmit} className="register-form">
-            <input type="text" name="tenDangNhap" onChange={handleChange} placeholder="Tên đăng nhập" required />
-            <input type="password" name="matKhau" onChange={handleChange} placeholder="Mật khẩu" required />
-            <input type="email" name="email" onChange={handleChange} placeholder="Email" required />
-            <input type="text" name="hoTen" onChange={handleChange} placeholder="Họ Tên" required />
-            <input type="text" name="soDienThoai" onChange={handleChange} placeholder="Số điện thoại" required />
-            <input type="text" name="diaChi" onChange={handleChange} placeholder="Địa chỉ" required />
+            {} 
+            
+             <h2>Đăng Ký</h2>
+            <div className="input-field">
+                <input type="text" name="tenDangNhap" onChange={handleChange} placeholder="Tên đăng nhập" required />
+            </div>
+            <div className="input-field">
+                <input type="password" name="matKhau" onChange={handleChange} placeholder="Mật khẩu" required />
+            </div>
+            <div className="input-field">
+                <input type="email" name="email" onChange={handleChange} placeholder="Email" required />
+            </div>
+            <div className="input-field">
+                <input type="text" name="hoTen" onChange={handleChange} placeholder="Họ Tên" required />
+            </div>
+            <div className="input-field">
+                <input type="text" name="soDienThoai" onChange={handleChange} placeholder="Số điện thoại" required />
+            </div>
+            <div className="input-field">
+                <input type="text" name="diaChi" onChange={handleChange} placeholder="Địa chỉ" required />
+            </div>
             
             {error && <div className="error-message">{error}</div>}
-            <button type="submit">Gửi Mã OTP & Tiếp tục (Bước 1/3)</button>
+            <button type="submit" className="submit-button">Đăng ký</button>
         </form>
     );
 };
