@@ -80,3 +80,47 @@ input:focus {
 .submit-button:hover {
     background-color: #4c68f3; /* Màu nền khi hover */
 }
+
+.gender-box {
+    display: flex;
+    flex-direction: column; /* label on top */
+    margin-bottom: 3px; /* match other fields */
+    padding: 8px 10px; /* similar padding to inputs */
+    border: 1px solid #ccc; /* same border as inputs */
+    border-radius: 5px; /* rounded corners */
+    background: #ffff; /* white box */
+    box-sizing: border-box;
+    max-width: 200px;
+    width: 100%;
+    font-size: 0.85rem; /* requested font size */
+    color: #f7f6f0; /* ivory / trắng ngà for text inside */
+}
+
+/* Make the "Giới tính:" label use the requested color and override box color */
+.gender-box > label {
+    color: #776e6e;
+    font-size: 0.85rem;
+}
+
+.gender-options {
+    display: flex; /* horizontal layout */
+    gap: 12px; /* reduced spacing between Nam and Nữ */
+    justify-content: flex-start; /* align left within box */
+    align-items: center;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center; /* vertical align */
+    cursor: pointer; /* pointer on hover */
+    gap: 5px;
+    padding: 6px 6px;
+    background: transparent;
+    color: #7b6161; /* option text darker for readability */
+    border-radius: 4px;
+}
+
+.radio-label input[type="radio"] {
+    width: 13px;
+    height: 13px;
+}

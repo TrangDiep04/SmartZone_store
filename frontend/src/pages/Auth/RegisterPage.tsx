@@ -12,6 +12,7 @@ interface RegisterData {
     hoTen: string;
     soDienThoai: string;
     diaChi: string;
+    gioiTinh: string;
 }
 
 const RegisterPage: React.FC = () => {

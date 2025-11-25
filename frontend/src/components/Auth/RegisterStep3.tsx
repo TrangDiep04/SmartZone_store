@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import authService from '../../api/authService'; // Đã đổi tên thành .ts
+import authService from '../../api/authService'; 
 
 interface RegisterData {
     tenDangNhap: string;
@@ -8,6 +8,7 @@ interface RegisterData {
     hoTen: string;
     soDienThoai: string;
     diaChi: string;
+    gioiTinh: string;
 }
 
 interface FinalRegistrationProps {
@@ -23,13 +24,16 @@ const FinalRegistration: React.FC<FinalRegistrationProps> = ({ formData, onCompl
         // Tự động gọi API cuối cùng khi Component được render (Bước 3)
         const finalize = async () => {
             try {
-                await authService.registerFinal(formData); 
+                const response = await authService.registerFinal(formData);
+                console.log('Register final response:', response);
                 setStatus('Đăng ký thành công!');
                 // Chờ 1.5 giây trước khi chuyển hướng
                 setTimeout(onComplete, 1500); 
             } catch (err) {
+                console.log('Register final error:', err);
                 const resp = (err as any).response?.data;
-                setError(resp || (err as Error).message || "Lỗi hoàn tất đăng ký.");
+                const errorMsg = typeof resp === 'string' ? resp : (resp?.message || (err as Error).message || "Lỗi hoàn tất đăng ký.");
+                setError(errorMsg);
                 setStatus('Hoàn tất đăng ký thất bại.');
             }
         };

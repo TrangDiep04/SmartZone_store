@@ -1,5 +1,5 @@
 import React from 'react';
-import useAuth from '../../hooks/useAuth'; // Đã đổi tên thành .ts
+import useAuth from '../../hooks/useAuth'; 
 import Header from '../../components/UI/Header';
 const AdminDashboard: React.FC = () => {
     const { userRole } = useAuth();

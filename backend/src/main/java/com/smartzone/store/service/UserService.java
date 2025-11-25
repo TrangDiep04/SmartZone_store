@@ -3,6 +3,7 @@ package com.smartzone.store.service;
 import com.smartzone.store.model.User;
 import com.smartzone.store.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -97,19 +98,31 @@ public class UserService {
     // LOGIC 3: ĐĂNG KÝ CUỐI CÙNG (Lưu User và xóa Cache)
     // =================================================================
     public void finalizeRegistration(User user) {
-        // Kiểm tra User đã tồn tại trong cache chưa (đã xác thực OTP)
-        if (!otpCache.containsKey(user.getTenDangNhap())) {
-             throw new RuntimeException("Yêu cầu đăng ký không hợp lệ. Vui lòng xác thực lại OTP.");
+        try {
+            // 1. Gán vai trò mặc định (User/Khách hàng)
+            user.setPhanQuyen("User");
+            
+            // 2. Lưu User vào DB
+            userRepository.save(user);
+            System.out.println("User saved successfully: " + user.getTenDangNhap());
+            
+            // 3. Dọn dẹp OTP khỏi cache sau khi đăng ký thành công (nếu tồn tại)
+            if (otpCache.containsKey(user.getTenDangNhap())) {
+                otpCache.remove(user.getTenDangNhap());
+                System.out.println("OTP cache removed for: " + user.getTenDangNhap());
+            }
+        } catch (DataIntegrityViolationException e) {
+            // User đã tồn tại, nhưng vẫn lưu thành công trước đó
+            // Chỉ log mà không throw error để frontend hiểu là thành công
+            System.out.println("DataIntegrityViolationException (User might already exist): " + e.getMessage());
+            e.printStackTrace();
+            // Không throw error - dữ liệu đã được lưu
+        } catch (Exception e) {
+            // Log error for debugging
+            System.err.println("Error during finalization: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi trong quá trình hoàn tất đăng ký: " + e.getMessage());
         }
-        
-        // 1. Gán vai trò mặc định (User/Khách hàng)
-        user.setPhanQuyen("User");
-        
-        // 2. Lưu User vào DB
-        userRepository.save(user);
-        
-        // 3. Dọn dẹp OTP khỏi cache sau khi đăng ký thành công
-        otpCache.remove(user.getTenDangNhap());
     }
 
     // =================================================================

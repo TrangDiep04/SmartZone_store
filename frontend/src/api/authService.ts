@@ -8,6 +8,7 @@ interface UserData {
     hoTen: string;
     soDienThoai: string;
     diaChi: string;
+    gioiTinh: string;
 }
 
 // Định nghĩa kiểu dữ liệu cho phản hồi đăng nhập

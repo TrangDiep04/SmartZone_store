@@ -7,6 +7,7 @@ public class DangKyRequest {
     private String email;
     private String soDienThoai;
     private String diaChi;
+    private String gioiTinh;
     private String otp; // Dùng cho bước nhập OTP
 
     // Constructors
@@ -30,6 +31,9 @@ public class DangKyRequest {
 
     public String getDiaChi() { return diaChi; }
     public void setDiaChi(String diaChi) { this.diaChi = diaChi; }
+
+    public String getGioiTinh() { return gioiTinh; }
+    public void setGioiTinh(String gioiTinh) { this.gioiTinh = gioiTinh; }
 
     public String getOtp() { return otp; }
     public void setOtp(String otp) { this.otp = otp; }

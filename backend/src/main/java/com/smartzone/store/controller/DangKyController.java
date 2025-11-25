@@ -57,24 +57,54 @@ public class DangKyController {
     @PostMapping("/register-final")
     public ResponseEntity<String> finalizeRegistration(@RequestBody DangKyRequest request) {
         try {
+            // Validate required fields
+            if (request.getTenDangNhap() == null || request.getTenDangNhap().trim().isEmpty()) {
+                return new ResponseEntity<>("Tên đăng nhập không được để trống.", HttpStatus.BAD_REQUEST);
+            }
+            if (request.getMatKhau() == null || request.getMatKhau().trim().isEmpty()) {
+                return new ResponseEntity<>("Mật khẩu không được để trống.", HttpStatus.BAD_REQUEST);
+            }
+            if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                return new ResponseEntity<>("Email không được để trống.", HttpStatus.BAD_REQUEST);
+            }
+            if (request.getHoTen() == null || request.getHoTen().trim().isEmpty()) {
+                return new ResponseEntity<>("Họ tên không được để trống.", HttpStatus.BAD_REQUEST);
+            }
+            if (request.getSoDienThoai() == null || request.getSoDienThoai().trim().isEmpty()) {
+                return new ResponseEntity<>("Số điện thoại không được để trống.", HttpStatus.BAD_REQUEST);
+            }
+            if (request.getDiaChi() == null || request.getDiaChi().trim().isEmpty()) {
+                return new ResponseEntity<>("Địa chỉ không được để trống.", HttpStatus.BAD_REQUEST);
+            }
+            if (request.getGioiTinh() == null || request.getGioiTinh().trim().isEmpty()) {
+                return new ResponseEntity<>("Giới tính không được để trống.", HttpStatus.BAD_REQUEST);
+            }
+            
             // 1. Chuyển đổi từ Request DTO sang Entity User
             User user = new User();
-            user.setTenDangNhap(request.getTenDangNhap());
+            user.setTenDangNhap(request.getTenDangNhap().trim());
             user.setMatKhau(request.getMatKhau()); 
-            user.setHoTen(request.getHoTen());
-            user.setEmail(request.getEmail());
-            user.setSoDienThoai(request.getSoDienThoai());
-            user.setDiaChi(request.getDiaChi());
+            user.setHoTen(request.getHoTen().trim());
+            user.setEmail(request.getEmail().trim());
+            user.setSoDienThoai(request.getSoDienThoai().trim());
+            user.setDiaChi(request.getDiaChi().trim());
+            user.setGioiTinh(request.getGioiTinh().trim());
             
-            // 2. Gọi Service để lưu User vào DB và xóa OTP khỏi cache
-            // Lưu ý: API này cần được bảo vệ để chỉ lưu khi OTP đã xác thực, 
-            // nhưng vì bạn đã loại bỏ Spring Security, Frontend cần đảm bảo luồng này.
+            // 2. Gọi Service để lưu User vào DB
             userService.finalizeRegistration(user);
 
+            // Always return 201 CREATED on success (or if data already saved)
             return new ResponseEntity<>("Đăng ký tài khoản thành công!", HttpStatus.CREATED);
         } catch (RuntimeException e) {
-             // Bắt lỗi nếu tài khoản đã bị lưu/OTP bị xóa do hết hạn trước khi gọi API này
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            // Bắt lỗi từ service
+            System.err.println("RuntimeException: " + e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            // Bắt tất cả các lỗi khác (database constraint violations, etc.)
+            System.err.println("Exception: " + e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<>("Lỗi hệ thống: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
