@@ -19,7 +19,7 @@ CREATE TABLE USERS (
     email VARCHAR(100) UNIQUE,
     soDienThoai VARCHAR(15),
     diaChi TEXT,
-    gioiTinh ENUM('Nam', 'Nu', 'Khac'),
+    gioiTinh ENUM('Nam', 'Nu'),
     phanQuyen ENUM('Admin', 'User') DEFAULT 'User'
 );
 
