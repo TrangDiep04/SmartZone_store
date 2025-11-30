@@ -44,9 +44,8 @@ public class UserService {
         this.mailSender = mailSender;
     }
 
-    // =================================================================
     // LOGIC 1: GỬI OTP (Kiểm tra trùng lặp, sinh mã, gửi email, lưu cache)
-    // =================================================================
+  
     public void createAndSendOtp(String tenDangNhap, String email) {
         // 1. Kiểm tra trùng lặp
         if (userRepository.findByTenDangNhap(tenDangNhap).isPresent()) {
@@ -67,9 +66,9 @@ public class UserService {
         sendOtpEmail(email, generatedOtp);
     }
     
-    // =================================================================
+   
     // LOGIC 2: XÁC THỰC OTP (Kiểm tra hết hạn và khớp mã)
-    // =================================================================
+ 
     public boolean verifyOtp(String tenDangNhap, String inputOtp) {
         OtpDetails details = otpCache.get(tenDangNhap);
 
@@ -94,9 +93,9 @@ public class UserService {
         return true;
     }
 
-    // =================================================================
+
     // LOGIC 3: ĐĂNG KÝ CUỐI CÙNG (Lưu User và xóa Cache)
-    // =================================================================
+
     public void finalizeRegistration(User user) {
         try {
             // 1. Gán vai trò mặc định (User/Khách hàng)
@@ -113,12 +112,11 @@ public class UserService {
             }
         } catch (DataIntegrityViolationException e) {
             // User đã tồn tại, nhưng vẫn lưu thành công trước đó
-            // Chỉ log mà không throw error để frontend hiểu là thành công
+           
             System.out.println("DataIntegrityViolationException (User might already exist): " + e.getMessage());
             e.printStackTrace();
-            // Không throw error - dữ liệu đã được lưu
+           
         } catch (Exception e) {
-            // Log error for debugging
             System.err.println("Error during finalization: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Lỗi trong quá trình hoàn tất đăng ký: " + e.getMessage());

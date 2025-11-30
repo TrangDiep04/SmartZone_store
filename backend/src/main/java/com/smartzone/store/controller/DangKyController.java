@@ -25,9 +25,7 @@ public class DangKyController {
             // Chỉ gửi thông tin cần thiết để tạo OTP và gửi Email
             // Logic kiểm tra trùng lặp sẽ được thực hiện trong Service
             userService.createAndSendOtp(request.getTenDangNhap(), request.getEmail());
-            
-            // Lưu ý: Thông tin đăng ký đầy đủ (matKhau, hoTen,...) cần được lưu tạm thời
-            // ở Frontend hoặc một cache riêng trong Service để dùng cho bước 3.
+              // ở Frontend hoặc một cache riêng trong Service để dùng cho bước 3.
             
             return ResponseEntity.ok("Mã OTP đã được gửi đến email " + request.getEmail() + ". Mã có hiệu lực 5 phút.");
         } catch (RuntimeException e) {

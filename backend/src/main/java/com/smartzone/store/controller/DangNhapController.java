@@ -13,15 +13,13 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class DangNhapController {
 
-    // Thay thế AuthenticationManager bằng UserRepository
     private final UserRepository userRepository;
 
     // Thay đổi constructor
     public DangNhapController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
-    // Khớp với biểu đồ: kiemTraHopLe()
+    
     @PostMapping("/login")
     public ResponseEntity<?> kiemTraHopLe(@RequestBody DangNhapRequest request) {
         
@@ -29,7 +27,7 @@ public class DangNhapController {
         User user = userRepository.findByTenDangNhap(request.getTenDangNhap())
             .orElse(null);
         
-        // 2. So sánh mật khẩu thô (Không mã hóa)
+        // 2. So sánh mật khẩu 
         if (user != null && user.getMatKhau().equals(request.getMatKhau())) {
             
             // Đăng nhập thành công, chuẩn bị thông tin phản hồi
