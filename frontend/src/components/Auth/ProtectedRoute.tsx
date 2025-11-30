@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
-import useAuth from '../../hooks/useAuth'; // Đã đổi tên thành .ts
+import useAuth from '../../hooks/useAuth';
 
 interface ProtectedRouteProps {
     children: ReactNode;

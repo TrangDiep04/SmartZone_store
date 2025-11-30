@@ -25,8 +25,8 @@ public class TimKiemController {
 
     // Tìm theo thương hiệu
     @GetMapping("/brand")
-    public List<Products> searchByBrand(@RequestParam("name") String brand) {
-        return productService.searchByBrand(brand);
+    public List<Products> searchByBrand(@RequestParam("name") String name) {
+        return productService.searchByBrand(name);
     }
 
 }

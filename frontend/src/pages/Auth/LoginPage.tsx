@@ -1,12 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth"; // Đã đổi tên thành .ts
-import "../../LoginPage.css"; // Đảm bảo bạn có file này
+import useAuth from "../../hooks/useAuth"; 
+import "../../LoginPage.css"; 
+
+// ✨ IMPORT CÁC THÀNH PHẦN CẦN THIẾT CỦA FONT AWESOME
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'; // faEye là mắt mở, faEyeSlash là mắt gạch chéo
 
 const LoginPage: React.FC = () => {
   const [tenDangNhap, setTenDangNhap] = useState<string>("");
   const [matKhau, setMatKhau] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  // Thêm trạng thái để quản lý việc hiển thị/ẩn mật khẩu
+  const [showPassword, setShowPassword] = useState<boolean>(false); 
+  
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -29,6 +36,11 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  // Hàm toggle trạng thái hiển thị mật khẩu
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="auth-container">
       <img
@@ -47,15 +59,32 @@ const LoginPage: React.FC = () => {
             required
           />
         </div>
-        <div className="input-field">
+        
+        {/* ✨ THAY ĐỔI CHO MẬT KHẨU VÀ ICON FONT AWESOME */}
+        <div className="input-field password-input-container"> 
           <input
-            type="password"
+            // Dùng trạng thái showPassword để chuyển đổi type giữa 'text' và 'password'
+            type={showPassword ? "text" : "password"} 
             placeholder="Mật khẩu"
             value={matKhau}
             onChange={(e) => setMatKhau(e.target.value)}
             required
           />
+          <button
+            type="button" // Quan trọng: type="button" để không submit form
+            onClick={togglePasswordVisibility}
+            className="password-toggle"
+            aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+          >
+            {/* Sử dụng FontAwesomeIcon */}
+            {showPassword ? (
+              <FontAwesomeIcon icon={faEyeSlash} /> // Biểu tượng mắt gạch chéo (Ẩn)
+            ) : (
+              <FontAwesomeIcon icon={faEye} />     // Biểu tượng mắt mở (Hiện)
+            )}
+          </button>
         </div>
+        {/* KẾT THÚC THAY ĐỔI */}
 
         {error && <div className="error-message">{error}</div>}
         <button type="submit" className="submit-button">
