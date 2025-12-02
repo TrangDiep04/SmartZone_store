@@ -1,17 +1,23 @@
 package com.smartzone.store.controller;
+
 import com.smartzone.store.model.Products;
 import com.smartzone.store.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @RequestMapping("/api/products")
+@CrossOrigin(origins = "*")
 public class TimKiemController {
-    @Autowired
-    private ProductService productService;
 
-//lay toan bo danh sach
+    private final ProductService productService;
+
+    public TimKiemController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    // Lấy toàn bộ sản phẩm
     @GetMapping
     public List<Products> getAllProducts() {
         return productService.getAllProducts();
@@ -19,14 +25,19 @@ public class TimKiemController {
 
     // Tìm theo tên sản phẩm
     @GetMapping("/search")
-    public List<Products> searchByName(@RequestParam("keyword") String keyword) {
+    public List<Products> searchByName(@RequestParam String keyword) {
         return productService.searchByName(keyword);
     }
 
     // Tìm theo thương hiệu
     @GetMapping("/brand")
-    public List<Products> searchByBrand(@RequestParam("name") String name) {
-        return productService.searchByBrand(name);
+    public List<Products> searchByBrand(@RequestParam String brand) {
+        return productService.searchByBrand(brand);
     }
 
+    // Tìm theo danh mục
+    @GetMapping("/category/{categoryId}")
+    public List<Products> getProductsByCategory(@PathVariable Integer categoryId) {
+        return productService.getProductsByCategory(categoryId);
+    }
 }

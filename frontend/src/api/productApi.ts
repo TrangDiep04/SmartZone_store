@@ -54,16 +54,16 @@ export const productApi = {
 
     /**
      * 3. TÌM KIẾM THEO THƯƠNG HIỆU 🏷️
-     * ENDPOINT: GET /api/products/brand?name=...
+     * ENDPOINT: GET /api/products/brand?brand=...
      * Tham số Backend: name
      */
-    searchByBrand: async (brandName: string): Promise<Product[]> => {
-        if (!brandName || brandName.trim() === '') {
+    searchByBrand: async (thuongHieu: string): Promise<Product[]> => {
+        if (!thuongHieu|| thuongHieu.trim() === '') {
             return productApi.getAllProducts(); 
         }
 
         const res = await axios.get(`${BASE_URL}/brand`, { 
-            params: { name: brandName } 
+            params: { brand: thuongHieu }
         });
         return res.data;
     },

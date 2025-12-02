@@ -5,45 +5,47 @@ import javax.persistence.*;
 @Entity
 @Table(name = "CATEGORIES")
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "maDanhMuc")
-    private Integer maDanhMuc;
+    private Integer id;
 
     @Column(name = "tenDanhMuc", nullable = false, length = 100)
-    private String tenDanhMuc;
+    private String name;
 
     @Column(name = "moTaDanhMuc", columnDefinition = "TEXT")
-    private String moTaDanhMuc;
+    private String description;
 
     public Category() {}
 
-    public Category(String tenDanhMuc, String moTaDanhMuc) {
-        this.tenDanhMuc = tenDanhMuc;
-        this.moTaDanhMuc = moTaDanhMuc;
+    public Category(String name, String description) {
+        this.name = name;
+        this.description = description;
     }
 
-    public Integer getMaDanhMuc() {
-        return maDanhMuc;
+    // GETTERS & SETTERS
+    public Integer getId() {
+        return id;
     }
 
-    public void setMaDanhMuc(Integer maDanhMuc) {
-        this.maDanhMuc = maDanhMuc;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public String getTenDanhMuc() {
-        return tenDanhMuc;
+    public String getName() {   // ✅ chuẩn hóa tên method
+        return name;
     }
 
-    public void setTenDanhMuc(String tenDanhMuc) {
-        this.tenDanhMuc = tenDanhMuc;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getMoTaDanhMuc() {
-        return moTaDanhMuc;
+    public String getDescription() {
+        return description;
     }
 
-    public void setMoTaDanhMuc(String moTaDanhMuc) {
-        this.moTaDanhMuc = moTaDanhMuc;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

@@ -1,163 +1,162 @@
 package com.smartzone.store.model;
+
 import javax.persistence.*;
+
 @Entity
 @Table(name = "PRODUCTS")
 public class Products {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(name = "maSanPham")
-        private Integer maSanPham;
 
-        @Column(name = "tenSanPham", nullable = false)
-        private String tenSanPham;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "maSanPham")
+    private Integer id;
 
-        @Column(name = "thuongHieu")
-        private String thuongHieu;
+    @Column(name = "tenSanPham", nullable = false)
+    private String name;
 
-        @Column(name = "hinhAnh")
-        private String hinhAnh;
+    @Column(name = "thuongHieu")
+    private String brand;
 
-        @Column(name = "namSanXuat")
-        private Integer namSanXuat;
+    @Column(name = "hinhAnh")
+    private String image;
 
-        @Column(name = "gia", nullable = false)
-        private Long gia;
+    @Column(name = "namSanXuat")
+    private Integer year;
 
-        @Column(name = "moTa", columnDefinition = "TEXT")
-        private String moTa;
+    @Column(name = "gia", nullable = false)
+    private Long price;
 
-        @Column(name = "mauSac")
-        private String mauSac;
+    @Column(name = "moTa", columnDefinition = "TEXT")
+    private String description;
 
-        @Column(name = "trangThai")
-        private String trangThai; // ENUM('ConHang','HetHang','NgungKinhDoanh')
+    @Column(name = "mauSac")
+    private String color;
 
-        @Column(name = "ngayRaMat")
-        private java.sql.Date ngayRaMat;
+    @Column(name = "trangThai")
+    private String status;
 
-        @Column(name = "soLuongTon")
-        private Integer soLuongTon;
+    @Column(name = "ngayRaMat")
+    private java.sql.Date releaseDate;
 
-        @Column(name = "maDanhMuc")
-        private Integer maDanhMuc; // FK tới CATEGORIES
+    @Column(name = "soLuongTon")
+    private Integer stock;
 
-        public Products() {
+    @ManyToOne
+    @JoinColumn(name = "maDanhMuc", nullable = false)
+    private Category category;
 
-        }
+    public Products() {}
 
-        // Constructor cơ bản (khi thêm sản phẩm mới)
-        public Products(String tenSanPham, Long gia, String thuongHieu, String hinhAnh,
-                       Integer namSanXuat, String moTa, String mauSac,
-                       String trangThai, java.sql.Date ngayRaMat,
-                       Integer soLuongTon, Integer maDanhMuc) {
-            this.tenSanPham = tenSanPham;
-            this.gia = gia;
-            this.thuongHieu = thuongHieu;
-            this.hinhAnh = hinhAnh;
-            this.namSanXuat = namSanXuat;
-            this.moTa = moTa;
-            this.mauSac = mauSac;
-            this.trangThai = trangThai;
-            this.ngayRaMat = ngayRaMat;
-            this.soLuongTon = soLuongTon;
-            this.maDanhMuc = maDanhMuc;
-        }
+    public Products(String name, Long price, String brand, String image,
+                    Integer year, String description, String color, String status,
+                    java.sql.Date releaseDate, Integer stock, Category category) {
+        this.name = name;
+        this.price = price;
+        this.brand = brand;
+        this.image = image;
+        this.year = year;
+        this.description = description;
+        this.color = color;
+        this.status = status;
+        this.releaseDate = releaseDate;
+        this.stock = stock;
+        this.category = category;
+    }
 
-        // GETTERS & SETTERS
-        public Integer getMaSanPham() {
-            return maSanPham;
-        }
+    // GETTERS & SETTERS
+    public Integer getId() {
+        return id;
+    }
 
-        public void setMaSanPham(Integer maSanPham) {
-            this.maSanPham = maSanPham;
-        }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-        public String getTenSanPham() {
-            return tenSanPham;
-        }
+    public String getName() {   // ✅ chuẩn hóa tên method
+        return name;
+    }
 
-        public void setTenSanPham(String tenSanPham) {
-            this.tenSanPham = tenSanPham;
-        }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-        public String getThuongHieu() {
-            return thuongHieu;
-        }
+    public String getBrand() {
+        return brand;
+    }
 
-        public void setThuongHieu(String thuongHieu) {
-            this.thuongHieu = thuongHieu;
-        }
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
 
-        public String getHinhAnh() {
-            return hinhAnh;
-        }
+    public String getImage() {
+        return image;
+    }
 
-        public void setHinhAnh(String hinhAnh) {
-            this.hinhAnh = hinhAnh;
-        }
+    public void setImage(String image) {
+        this.image = image;
+    }
 
-        public Integer getNamSanXuat() {
-            return namSanXuat;
-        }
+    public Integer getYear() {
+        return year;
+    }
 
-        public void setNamSanXuat(Integer namSanXuat) {
-            this.namSanXuat = namSanXuat;
-        }
+    public void setYear(Integer year) {
+        this.year = year;
+    }
 
-        public Long getGia() {
-            return gia;
-        }
+    public Long getPrice() {
+        return price;
+    }
 
-        public void setGia(Long gia) {
-            this.gia = gia;
-        }
+    public void setPrice(Long price) {
+        this.price = price;
+    }
 
-        public String getMoTa() {
-            return moTa;
-        }
+    public String getDescription() {
+        return description;
+    }
 
-        public void setMoTa(String moTa) {
-            this.moTa = moTa;
-        }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-        public String getMauSac() {
-            return mauSac;
-        }
+    public String getColor() {
+        return color;
+    }
 
-        public void setMauSac(String mauSac) {
-            this.mauSac = mauSac;
-        }
+    public void setColor(String color) {
+        this.color = color;
+    }
 
-        public String getTrangThai() {
-            return trangThai;
-        }
+    public String getStatus() {
+        return status;
+    }
 
-        public void setTrangThai(String trangThai) {
-            this.trangThai = trangThai;
-        }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-        public java.sql.Date getNgayRaMat() {
-            return ngayRaMat;
-        }
+    public java.sql.Date getReleaseDate() {
+        return releaseDate;
+    }
 
-        public void setNgayRaMat(java.sql.Date ngayRaMat) {
-            this.ngayRaMat = ngayRaMat;
-        }
+    public void setReleaseDate(java.sql.Date releaseDate) {
+        this.releaseDate = releaseDate;
+    }
 
-        public Integer getSoLuongTon() {
-            return soLuongTon;
-        }
+    public Integer getStock() {
+        return stock;
+    }
 
-        public void setSoLuongTon(Integer soLuongTon) {
-            this.soLuongTon = soLuongTon;
-        }
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
 
-        public Integer getMaDanhMuc() {
-            return maDanhMuc;
-        }
+    public Category getCategory() {
+        return category;
+    }
 
-        public void setMaDanhMuc(Integer maDanhMuc) {
-            this.maDanhMuc = maDanhMuc;
-        }
-
+    public void setCategory(Category category) {
+        this.category = category;
+    }
 }
