@@ -17,10 +17,13 @@ const Cart: React.FC = () => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Xóa sản phẩm khỏi giỏ
-  const removeFromCart = (index: number) => {
-    setCartItems(prev => prev.filter((_, i) => i !== index));
+  // Xóa sản phẩm khỏi giỏ theo id
+  const removeFromCart = (id: number) => {
+    setCartItems(prev => prev.filter(item => item.maSanPham !== id));
   };
+
+  // Tính tổng tiền
+  const total = cartItems.reduce((sum, item) => sum + (item.gia ?? 0), 0);
 
   return (
     <div style={{ padding: 20 }}>
@@ -28,19 +31,22 @@ const Cart: React.FC = () => {
       {cartItems.length === 0 ? (
         <p>Giỏ hàng trống</p>
       ) : (
-        <ul>
-          {cartItems.map((item, i) => (
-            <li key={i}>
-              {item.tenSanPham} - {item.gia?.toLocaleString()} VND
-              <button
-                onClick={() => removeFromCart(i)}
-                style={{ marginLeft: 10, color: 'red' }}
-              >
-                Xóa
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul>
+            {cartItems.map(item => (
+              <li key={item.maSanPham}>
+                {item.tenSanPham} - {item.gia?.toLocaleString()} VND
+                <button
+                  onClick={() => removeFromCart(item.maSanPham)}
+                  style={{ marginLeft: 10, color: 'red' }}
+                >
+                  Xóa
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p><strong>Tổng cộng:</strong> {total.toLocaleString()} VND</p>
+        </>
       )}
     </div>
   );

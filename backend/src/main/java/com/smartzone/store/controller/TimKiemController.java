@@ -2,6 +2,7 @@ package com.smartzone.store.controller;
 
 import com.smartzone.store.model.Products;
 import com.smartzone.store.service.ProductService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,13 @@ public class TimKiemController {
     @GetMapping
     public List<Products> getAllProducts() {
         return productService.getAllProducts();
+    }
+
+    // Lấy chi tiết sản phẩm theo ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Products> getProductById(@PathVariable Integer id) {
+        Products product = productService.getProductById(id);
+        return ResponseEntity.ok(product);
     }
 
     // Tìm theo tên sản phẩm

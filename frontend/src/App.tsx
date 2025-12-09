@@ -12,63 +12,84 @@ import Cart from './pages/User/Cart'; // thêm giỏ hàng
 import './styles/layout.css';
 
 function App() {
-    return (
-        <div className="app-root">
-            <header className="app-header"><Header /></header>
-            <main className="app-main">
-                <div className="app-container">
-                    <Routes>
-                        {/* Tuyến công khai */}
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/register" element={<RegisterPage />} />
+  return (
+    <div className="app-root">
+      <header className="app-header">
+        <Header />
+      </header>
 
-                        {/* Trang chính (UserDashboard as root) */}
-                        <Route path="/" element={
-                            <ProtectedRoute>
-                                <UserDashboard />
-                            </ProtectedRoute>
-                        } />
-                        <Route path="/user/dashboard" element={
-                            <ProtectedRoute>
-                                <UserDashboard />
-                            </ProtectedRoute>
-                        } />
+      <main className="app-main">
+        <div className="app-container">
+          <Routes>
+            {/* Tuyến công khai */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
 
-                        {/* Public product listing */}
-                        <Route path="/products" element={<ProductList />} />
+            {/* Trang chính (UserDashboard as root) */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <UserDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user/dashboard"
+              element={
+                <ProtectedRoute>
+                  <UserDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-                        {/* Trang chi tiết sản phẩm */}
-                        <Route path="/products/:id" element={<ProductDetail />} />
+            {/* Public product listing */}
+            <Route path="/products" element={<ProductList />} />
 
-                        {/* Trang giỏ hàng */}
-                        <Route path="/cart" element={
-                            <ProtectedRoute>
-                                <Cart />
-                            </ProtectedRoute>
-                        } />
+            {/* Trang chi tiết sản phẩm */}
+            <Route path="/products/:id" element={<ProductDetail />} />
 
-                        {/* Tuyến đặc biệt (Chỉ Admin mới truy cập được) */}
-                        <Route path="/admin/dashboard" element={
-                            <ProtectedRoute requiredRole="Admin">
-                                <AdminDashboard />
-                            </ProtectedRoute>
-                        } />
+            {/* Trang giỏ hàng */}
+            <Route
+              path="/cart"
+              element={
+                <ProtectedRoute>
+                  <Cart />
+                </ProtectedRoute>
+              }
+            />
 
-                        {/* Xử lý 404 */}
-                        <Route path="*" element={
-                            <div style={{ textAlign: 'center', padding: '100px' }}>
-                                <h1>404</h1>
-                                <p>Không tìm thấy trang.</p>
-                            </div>
-                        } />
-                    </Routes>
+            {/* Tuyến đặc biệt (Chỉ Admin mới truy cập được) */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute requiredRole="Admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Xử lý 404 */}
+            <Route
+              path="*"
+              element={
+                <div style={{ textAlign: 'center', padding: '100px' }}>
+                  <h1>404</h1>
+                  <p>Không tìm thấy trang.</p>
                 </div>
-            </main>
-            <footer className="app-footer">
-                <div className="footer-inner"><Footer /></div>
-            </footer>
+              }
+            />
+          </Routes>
         </div>
-    );
+      </main>
+
+      <footer className="app-footer">
+        <div className="footer-inner">
+          <Footer />
+        </div>
+      </footer>
+    </div>
+  );
 }
 
 export default App;

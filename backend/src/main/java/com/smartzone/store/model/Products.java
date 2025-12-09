@@ -20,9 +20,6 @@ public class Products {
     @Column(name = "hinhAnh")
     private String image;
 
-    @Column(name = "namSanXuat")
-    private Integer year;
-
     @Column(name = "gia", nullable = false)
     private Long price;
 
@@ -34,9 +31,6 @@ public class Products {
 
     @Column(name = "trangThai")
     private String status;
-
-    @Column(name = "ngayRaMat")
-    private java.sql.Date releaseDate;
 
     @Column(name = "soLuongTon")
     private Integer stock;
@@ -54,11 +48,9 @@ public class Products {
         this.price = price;
         this.brand = brand;
         this.image = image;
-        this.year = year;
         this.description = description;
         this.color = color;
         this.status = status;
-        this.releaseDate = releaseDate;
         this.stock = stock;
         this.category = category;
     }
@@ -95,15 +87,6 @@ public class Products {
     public void setImage(String image) {
         this.image = image;
     }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
     public Long getPrice() {
         return price;
     }
@@ -134,14 +117,6 @@ public class Products {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public java.sql.Date getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(java.sql.Date releaseDate) {
-        this.releaseDate = releaseDate;
     }
 
     public Integer getStock() {

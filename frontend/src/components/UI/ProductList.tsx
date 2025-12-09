@@ -1,17 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from "../UI/ProductCard";
-// ⭐ Sửa import: Phải import toàn bộ object productApi để gọi các hàm tìm kiếm chuyên biệt
-import { productApi, type Product} from "../../api/productApi"; 
+import { productApi, type Product} from "../../api/productApi";
 
 const ProductList: React.FC = () => {
-    // ⭐ Cập nhật kiểu dữ liệu cho products
-    const [products, setProducts] = useState<Product[]>([]); 
+    const [products, setProducts] = useState<Product[]>([]);
     const [searchParams, setSearchParams] = useSearchParams();
-    
-    // Lấy trạng thái ban đầu từ URL
+
     const initialQuery = searchParams.get('q') ?? '';
-    const initialCategory = searchParams.get('category') ?? ''; // category vẫn là string/number
+    const initialCategory = searchParams.get('category') ?? '';
     const initialPage = Number(searchParams.get('page') ?? '0');
     const initialSize = Number(searchParams.get('size') ?? '8');
 
@@ -19,16 +16,14 @@ const ProductList: React.FC = () => {
     const [size, setSize] = useState<number>(initialSize);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [query, setQuery] = useState<string>(initialQuery);
-    // ⭐ Chuyển category thành categoryId dạng number để dễ sử dụng
     const categoryId = initialCategory ? Number(initialCategory) : undefined;
-    
+
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
     // debounce input
     const debounceRef = useRef<number | undefined>(undefined);
-    
-    // ⭐ Biến cờ: Kiểm tra xem có đang tìm kiếm/lọc chuyên biệt không (vì Backend không phân trang cho chúng)
+
     const isSearchingOrFiltering = !!query.trim() || (categoryId !== undefined && categoryId > 0);
 
 
@@ -50,7 +45,7 @@ const ProductList: React.FC = () => {
                 fetchProducts(0, size, query, categoryId); // Nếu page đã là 0, gọi fetchProducts trực tiếp
             }
         }, 400); // 400ms debounce
-        
+
         return () => window.clearTimeout(debounceRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query]);
@@ -61,12 +56,12 @@ const ProductList: React.FC = () => {
         setError(null);
         try {
             let res: any;
-            
+
             // ⭐ ĐIỀU CHỈNH LOGIC GỌI API DỰA TRÊN THAM SỐ:
             if (q && q.trim() !== '') {
                 // ƯU TIÊN TÌM KIẾM THEO TÊN (q) -> Dùng searchByName
                 // Backend không hỗ trợ phân trang cho endpoint này
-                res = await productApi.searchByName(q); 
+                res = await productApi.searchByName(q);
             } else if (categoryIdParam !== undefined && categoryIdParam > 0) {
                 // SAU ĐÓ LỌC THEO DANH MỤC -> Dùng getByCategory
                 // Backend không hỗ trợ phân trang cho endpoint này
@@ -75,12 +70,12 @@ const ProductList: React.FC = () => {
                 // CUỐI CÙNG: Lấy tất cả -> Dùng getAllProducts (có thể có phân trang)
                 res = await productApi.getAllProducts({ page: pageNum, size: pageSize });
             }
-            
+
             // ⭐ Sync URL với current params
             const params: Record<string, string> = {};
             if (q) params.q = q;
             if (categoryIdParam) params.category = String(categoryIdParam);
-            
+
             // Chỉ thêm phân trang vào URL nếu không phải là tìm kiếm/lọc chuyên biệt
             if (!isSearchingOrFiltering) {
                 params.page = String(pageNum);

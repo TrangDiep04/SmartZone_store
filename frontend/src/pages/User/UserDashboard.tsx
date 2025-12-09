@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
-import useAuth from '../../hooks/useAuth';
-import { productApi, type Product } from '../../api/productApi';
-import { categoryApi, type Category } from '../../api/categoryApi';
-import ProductCard from '../../components/UI/ProductCard';
-import Sidebar from '../../components/UI/Sidebar';
+import React, { useEffect, useState, useRef } from "react";
+import useAuth from "../../hooks/useAuth";
+import { productApi, type Product } from "../../api/productApi";
+import { categoryApi, type Category } from "../../api/categoryApi";
+import ProductCard from "../../components/UI/ProductCard";
+import Sidebar from "../../components/UI/Sidebar";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 21;
 
 const UserDashboard: React.FC = () => {
-  const { userRole } = useAuth();
+  const { userRole } = useAuth(); // nếu không dùng có thể bỏ
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -16,27 +16,29 @@ const UserDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [query, setQuery] = useState<string>('');
-  const debounceRef = useRef<number | undefined>(undefined);
+  const [query, setQuery] = useState<string>("");
 
-  // Giỏ hàng (chỉ quản lý state, không render ở cuối)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Giỏ hàng (chỉ quản lý state, chưa đồng bộ với Cart page)
   const [cartItems, setCartItems] = useState<Product[]>([]);
 
   const addToCart = (product: Product) => {
-    setCartItems(prev => [...prev, product]);
-    alert(`Đã thêm "${product.tenSanPham}" vào giỏ hàng!`);
+    setCartItems((prev) => [...prev, product]);
+    alert(`Đã thêm "${product.name}" vào giỏ hàng!`);
   };
 
   // Load danh mục khi mount
   useEffect(() => {
-    categoryApi.getAll()
+    categoryApi
+      .getAll()
       .then(setCategories)
-      .catch(() => setCategories([]));
+      .catch(() => setError("Không thể tải danh mục"));
   }, []);
 
   // Load sản phẩm ban đầu
   useEffect(() => {
-    fetchProducts('');
+    fetchProducts("");
   }, []);
 
   // Cắt sản phẩm theo trang
@@ -57,7 +59,10 @@ const UserDashboard: React.FC = () => {
         const brandRes = await productApi.searchByBrand(searchQuery.trim());
         const nameRes = await productApi.searchByName(searchQuery.trim());
         const combined = [...brandRes, ...nameRes];
-        const uniqueProducts = Array.from(new Map(combined.map(p => [p.maSanPham, p])).values());
+        // loại bỏ trùng sản phẩm theo id
+        const uniqueProducts = Array.from(
+          new Map(combined.map((p) => [p.id, p])).values()
+        );
         res = uniqueProducts;
       } else {
         res = await productApi.getAllProducts();
@@ -68,8 +73,8 @@ const UserDashboard: React.FC = () => {
       setPage(0);
       setProducts(res.slice(0, PAGE_SIZE));
     } catch (err) {
-      console.error('Failed to load products', err);
-      setError('Không thể tải sản phẩm');
+      console.error("Failed to load products", err);
+      setError("Không thể tải sản phẩm");
     } finally {
       setLoading(false);
     }
@@ -77,13 +82,14 @@ const UserDashboard: React.FC = () => {
 
   // Lấy sản phẩm theo danh mục
   const handleCategorySelect = async (categoryId: number | null) => {
-    setQuery('');
+    setQuery("");
     setLoading(true);
     setError(null);
     try {
-      const res = categoryId === null
-        ? await productApi.getAllProducts()
-        : await productApi.getByCategory(categoryId);
+      const res =
+        categoryId === null
+          ? await productApi.getAllProducts()
+          : await productApi.getByCategory(categoryId);
 
       setAllProducts(res);
       setTotalPages(Math.ceil(res.length / PAGE_SIZE));
@@ -91,7 +97,7 @@ const UserDashboard: React.FC = () => {
       setProducts(res.slice(0, PAGE_SIZE));
     } catch (err) {
       console.error(err);
-      setError('Không thể tải sản phẩm theo danh mục');
+      setError("Không thể tải sản phẩm theo danh mục");
     } finally {
       setLoading(false);
     }
@@ -100,14 +106,14 @@ const UserDashboard: React.FC = () => {
   // Debounce tìm kiếm
   const onSearchChange = (v: string) => {
     setQuery(v);
-    window.clearTimeout(debounceRef.current);
-    debounceRef.current = window.setTimeout(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
       fetchProducts(v);
     }, 350);
   };
 
   return (
-    <div style={{ display: 'flex', gap: 20, padding: 20 }}>
+    <div style={{ display: "flex", gap: 20, padding: 20 }}>
       <Sidebar
         categories={categories}
         onSelect={handleCategorySelect}
@@ -119,37 +125,40 @@ const UserDashboard: React.FC = () => {
             value={query}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Tìm kiếm sản phẩm hoặc thương hiệu..."
-            style={{ padding: '8px 12px', width: '100%', borderRadius: 6, border: '1px solid #ddd' }}
+            style={{
+              padding: "8px 12px",
+              width: "100%",
+              borderRadius: 6,
+              border: "1px solid #ddd",
+            }}
           />
         </div>
 
-        <h2 style={{ margin: '8px 0 12px' }}>
-          {query
-            ? `Kết quả tìm kiếm cho "${query}"`
-            : 'Danh sách sản phẩm'}
+        <h2 style={{ margin: "8px 0 12px" }}>
+          {query ? `Kết quả tìm kiếm cho "${query}"` : "Danh sách sản phẩm"}
         </h2>
 
         {loading && <div>Đang tải sản phẩm...</div>}
-        {error && <div style={{ color: 'red' }}>{error}</div>}
+        {error && <div style={{ color: "red" }}>{error}</div>}
 
         {!loading && !error && (
           <>
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
                 gap: 16,
               }}
             >
-              {products.map((p: Product, i: number) => (
-                <div key={p?.maSanPham ?? i}>
+              {products.map((p: Product) => (
+                <div key={p.id}>
                   <ProductCard product={p} onAddToCart={addToCart} />
                 </div>
               ))}
             </div>
 
             {totalPages > 1 && (
-              <div style={{ marginTop: 20, textAlign: 'center' }}>
+              <div style={{ marginTop: 20, textAlign: "center" }}>
                 <button
                   disabled={page === 0}
                   onClick={() => setPage((prev) => prev - 1)}
