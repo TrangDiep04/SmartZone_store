@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Định nghĩa URL cơ sở (Base URL)
-const BASE_URL = "http://localhost:8080/api/products"; 
+const BASE_URL = "http://localhost:8080/api/products";
 
 // --- INTERFACE PRODUCT TRÙNG KHỚP VỚI Products.java ---
 export interface Product {
@@ -13,7 +13,7 @@ export interface Product {
     gia: number; // Long trong Java, ánh xạ sang number trong TS
     moTa: string;
     mauSac: string;
-    trangThai: string; 
+    trangThai: string;
     ngayRaMat: string; // java.sql.Date, ánh xạ sang string
     soLuongTon: number;
     maDanhMuc: number;
@@ -26,55 +26,39 @@ export interface ProductQueryParams {
 }
 
 export const productApi = {
-    
-    /**
-     * 1. LẤY TẤT CẢ SẢN PHẨM 📦
-     * ENDPOINT: GET /api/products
-     */
+    /** 1. LẤY TẤT CẢ SẢN PHẨM 📦 */
     getAllProducts: async (params?: ProductQueryParams): Promise<Product[]> => {
         const res = await axios.get(BASE_URL, { params });
         return res.data;
     },
 
-    /**
-     * 2. TÌM KIẾM THEO TÊN SẢN PHẨM 🔍
-     * ENDPOINT: GET /api/products/search?keyword=...
-     * Tham số Backend: keyword
-     */
+    /** 2. TÌM KIẾM THEO TÊN SẢN PHẨM 🔍 */
     searchByName: async (keyword: string): Promise<Product[]> => {
         if (!keyword || keyword.trim() === '') {
-            return productApi.getAllProducts(); 
+            return productApi.getAllProducts();
         }
-        
-        const res = await axios.get(`${BASE_URL}/search`, { 
-            params: { keyword: keyword } 
-        });
+        const res = await axios.get(`${BASE_URL}/search`, { params: { keyword } });
         return res.data;
     },
 
-    /**
-     * 3. TÌM KIẾM THEO THƯƠNG HIỆU 🏷️
-     * ENDPOINT: GET /api/products/brand?brand=...
-     * Tham số Backend: name
-     */
+    /** 3. TÌM KIẾM THEO THƯƠNG HIỆU 🏷️ */
     searchByBrand: async (thuongHieu: string): Promise<Product[]> => {
-        if (!thuongHieu|| thuongHieu.trim() === '') {
-            return productApi.getAllProducts(); 
+        if (!thuongHieu || thuongHieu.trim() === '') {
+            return productApi.getAllProducts();
         }
-
-        const res = await axios.get(`${BASE_URL}/brand`, { 
-            params: { brand: thuongHieu }
-        });
+        const res = await axios.get(`${BASE_URL}/brand`, { params: { brand: thuongHieu } });
         return res.data;
     },
 
-    /**
-     * 4. LẤY SẢN PHẨM THEO DANH MỤC 📂
-     * ENDPOINT: GET /api/products/category/{categoryId}
-     * Tham số Backend: Path Variable {categoryId}
-     */
+    /** 4. LẤY SẢN PHẨM THEO DANH MỤC 📂 */
     getByCategory: async (categoryId: number): Promise<Product[]> => {
         const res = await axios.get(`${BASE_URL}/category/${categoryId}`);
+        return res.data;
+    },
+
+    /** 5. LẤY CHI TIẾT SẢN PHẨM 📝 */
+    getById: async (maSanPham: number): Promise<Product> => {
+        const res = await axios.get(`${BASE_URL}/${id}`);
         return res.data;
     }
 };
