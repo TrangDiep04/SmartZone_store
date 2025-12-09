@@ -19,6 +19,14 @@ const UserDashboard: React.FC = () => {
   const [query, setQuery] = useState<string>('');
   const debounceRef = useRef<number | undefined>(undefined);
 
+  // Giỏ hàng (chỉ quản lý state, không render ở cuối)
+  const [cartItems, setCartItems] = useState<Product[]>([]);
+
+  const addToCart = (product: Product) => {
+    setCartItems(prev => [...prev, product]);
+    alert(`Đã thêm "${product.tenSanPham}" vào giỏ hàng!`);
+  };
+
   // Load danh mục khi mount
   useEffect(() => {
     categoryApi.getAll()
@@ -135,7 +143,7 @@ const UserDashboard: React.FC = () => {
             >
               {products.map((p: Product, i: number) => (
                 <div key={p?.maSanPham ?? i}>
-                  <ProductCard product={p} />
+                  <ProductCard product={p} onAddToCart={addToCart} />
                 </div>
               ))}
             </div>
