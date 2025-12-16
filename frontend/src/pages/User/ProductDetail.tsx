@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { productApi, type Product } from '../../api/productApi';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showFullDescription, setShowFullDescription] = useState(false); // trạng thái mô tả
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -19,125 +20,80 @@ const ProductDetail: React.FC = () => {
           setProduct(res);
         }
       } catch (err) {
-        console.error(err);
         setError('Không thể tải chi tiết sản phẩm');
       } finally {
         setLoading(false);
       }
     };
-
     fetchProduct();
   }, [id]);
 
-  if (loading) return <div>Đang tải chi tiết sản phẩm...</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
-  if (!product) return <div>Không tìm thấy sản phẩm</div>;
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    try {
+      const savedCart = localStorage.getItem('cart');
+      const currentCart: Product[] = savedCart ? JSON.parse(savedCart) : [];
+
+      // Thêm sản phẩm vào mảng
+      const updatedCart = [...currentCart, product];
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+
+     
+      const productName = product.tenSanPham || (product as any).name || "Sản phẩm";
+      alert(`Đã thêm "${productName}" vào giỏ hàng!`);
+      
+      window.dispatchEvent(new Event("storage"));
+    } catch (err) {
+      console.error("Lỗi thêm vào giỏ:", err);
+    }
+  };
 
   const handleBuyNow = () => {
-    alert(`Bạn đã chọn mua ngay sản phẩm: ${product.name}`);
+    handleAddToCart();
+    navigate('/cart');
   };
 
-  const handleAddToCart = () => {
-    alert(`Sản phẩm "${product.name}" đã được thêm vào giỏ hàng`);
-  };
+  if (loading) return <div style={{ padding: 20 }}>Đang tải...</div>;
+  if (error) return <div style={{ padding: 20, color: 'red' }}>{error}</div>;
+  if (!product) return <div style={{ padding: 20 }}>Không tìm thấy sản phẩm</div>;
 
-  const shortDescription = product.description.slice(0, 1300);
+  // Mapping dữ liệu để hiển thị giao diện an toàn
+  const name = product.tenSanPham || (product as any).name || "Không rõ tên";
+  const price = product.gia || (product as any).price || 0;
+  const image = product.hinhAnh || (product as any).image || "";
+  const brand = product.thuongHieu || (product as any).brand || "Đang cập nhật";
+  const description = product.moTa || product.description || "Đang cập nhật mô tả...";
 
   return (
-    <div style={{ padding: 20, maxWidth: 900, margin: '0 auto' }}>
-      <div style={{ display: 'flex', gap: 30 }}>
-        {/* Ảnh sản phẩm bên trái */}
-        {product.image && (
-          <div style={{ flex: '0 0 250px' }}>
-            <img
-              src={product.image}
-              alt={product.name}
-              style={{
-                width: '100%',
-                height: 'auto',
-                borderRadius: 8,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}
-            />
-          </div>
-        )}
-
-        {/* Thông tin sản phẩm bên phải */}
+    <div style={{ padding: 40, maxWidth: 1000, margin: '0 auto' }}>
+      <div style={{ display: 'flex', gap: 40 }}>
+        <div style={{ flex: '0 0 400px' }}>
+          <img src={image} alt={name} style={{ width: '100%', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+        </div>
         <div style={{ flex: 1 }}>
-          <h2 style={{ marginBottom: 10 }}>{product.name}</h2>
-          <p><strong>Giá:</strong> {product.price ? product.price.toLocaleString() : 'Liên hệ'} VNĐ</p>
-          <p><strong>Thương hiệu:</strong> {product.brand}</p>
-          <p><strong>Loại:</strong> {product.category?.name}</p>
-          <p><strong>Số lượng tồn:</strong> {product.stock}</p>
-
-          {/* Nút hành động */}
-          <div style={{ marginTop: 20, display: 'flex', gap: 10 }}>
-            <button
-              onClick={handleAddToCart}
-              style={{
-                flex: 1,
-                padding: '10px 20px',
-                background: '#1976d2',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer'
-              }}
-            >
-              Thêm vào giỏ
+          <h1>{name}</h1>
+          <p style={{ fontSize: '1.8rem', color: '#d32f2f', fontWeight: 'bold' }}>
+            {Number(price).toLocaleString()} VNĐ
+          </p>
+          <p><strong>Thương hiệu:</strong> {brand}</p>
+          <div style={{ display: 'flex', gap: 15, marginTop: 30 }}>
+            <button onClick={handleAddToCart} style={{ flex: 1, padding: '15px', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 'bold' }}>
+              THÊM VÀO GIỎ
             </button>
-            <button
-              onClick={handleBuyNow}
-              style={{
-                flex: 1,
-                padding: '10px 20px',
-                background: '#f57c00',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer'
-              }}
-            >
-              Mua hàng
+            <button onClick={handleBuyNow} style={{ flex: 1, padding: '15px', background: '#f57c00', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 'bold' }}>
+              MUA NGAY
             </button>
           </div>
         </div>
       </div>
-
-      {/* Mô tả sản phẩm */}
-      <div style={{ marginTop: 30 }}>
+      <div style={{ marginTop: 40 }}>
         <h3>Mô tả sản phẩm</h3>
-        <p>
-          {showFullDescription ? product.description : `${shortDescription}... `}
-          {!showFullDescription ? (
-            <button
-              onClick={() => setShowFullDescription(true)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#1976d2',
-                cursor: 'pointer',
-                padding: 0,
-                fontSize: '1em'
-              }}
-            >
-              Xem thêm
-            </button>
-          ) : (
-            <button
-              onClick={() => setShowFullDescription(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#1976d2',
-                cursor: 'pointer',
-                padding: 0,
-                fontSize: '1em'
-              }}
-            >
-              Thu gọn
-            </button>
-          )}
+        <p style={{ whiteSpace: 'pre-line', lineHeight: '1.6' }}>
+          {showFullDescription ? description : `${description.slice(0, 500)}...`}
+          <button onClick={() => setShowFullDescription(!showFullDescription)} style={{ background: 'none', border: 'none', color: '#1976d2', cursor: 'pointer', marginLeft: 5 }}>
+            {showFullDescription ? "Thu gọn" : "Xem thêm"}
+          </button>
         </p>
       </div>
     </div>

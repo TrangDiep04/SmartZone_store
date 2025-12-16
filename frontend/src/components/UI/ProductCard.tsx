@@ -1,101 +1,56 @@
 import React from "react";
-import { Card, CardMedia, CardContent, Typography } from "@mui/material";
+import { Card, CardMedia, CardContent, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import { type Product } from "../../api/productApi";
 
-type AnyProduct = Record<string, any> | undefined;
+interface ProductCardProps {
+  product: Product;
+  onAddToCart: (product: Product) => void;
+}
 
-// ⭐ BƯỚC 1: TẠO MAPPING (RESOLVE) TẤT CẢ CÁC ẢNH CỤC BỘ TỪ CÁC FOLDER
-const allImageModules = import.meta.glob<string>(
-  [
-    "../../images/Iphone/*",
-    "../../images/ANDROID FLAGSHIP/*",
-    "../../images/ANDROID TẦM TRUNG/*",
-    "../../images/MÁY CŨĐÃ QUA SỬ DỤNG/*",
-  ],
-  { eager: true, as: "url" }
-);
-
-const ProductCard: React.FC<{ product?: AnyProduct }> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   const navigate = useNavigate();
 
-  if (!product) {
-    return (
-      <Card sx={{ width: 250 }}>
-        <CardContent>
-          <Typography variant="h6">Không có thông tin sản phẩm</Typography>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const name = product.name ?? product.tenSanPham ?? "Không có tên";
-  const brand = product.brand ?? product.thuongHieu ?? "";
-  const rawImage =
-    product.image ?? product.hinhAnh ?? product.hinhAnhFileName ?? "";
-
-  let image = "";
-  try {
-    if (rawImage && typeof rawImage === "string") {
-      const trimmed = rawImage.trim();
-      if (/^https?:\/\//i.test(trimmed)) {
-        image = trimmed;
-      } else {
-        const filenameToFind = trimmed.toLowerCase();
-        for (const path in allImageModules) {
-          const modulePath = path.toLowerCase();
-          if (modulePath.endsWith(`/${filenameToFind}`)) {
-            image = allImageModules[path];
-            break;
-          }
-        }
-        if (!image && trimmed.includes("/")) {
-          try {
-            image = new URL(`../../${trimmed}`, import.meta.url).href;
-          } catch (e) {
-            image = trimmed;
-          }
-        }
-      }
-    }
-  } catch (err) {
-    console.error("Image resolution error:", err);
-    image = "";
-  }
-
-  const rawPrice = product.price ?? product.gia ?? 0;
-  const priceNumber =
-    typeof rawPrice === "number" ? rawPrice : Number(rawPrice) || 0;
+  const name = product.tenSanPham || (product as any).name || "Không có tên";
+  const brand = product.thuongHieu || (product as any).brand || "";
+  const image = product.hinhAnh || (product as any).image || "";
+  const price = product.gia || (product as any).price || 0;
+  const id = product.maSanPham || (product as any).id;
 
   return (
     <Card
-      sx={{ width: 250, cursor: "pointer" }}
-      onClick={() => navigate(`/products/${product.id}`)} // ⭐ Điều hướng tới trang chi tiết
+      sx={{ 
+        height: '100%', display: 'flex', flexDirection: 'column', cursor: "pointer",
+        transition: "transform 0.2s", "&:hover": { transform: "scale(1.02)", boxShadow: 6 } 
+      }}
+      onClick={() => navigate(`/products/${id}`)}
     >
-      {image ? (
-        <CardMedia
-          component="img"
-          height="140"
-          image={image}
-          alt={name}
-          sx={{ objectFit: "contain", background: "#fff" }}
-        />
-      ) : (
-        <div
-          style={{
-            height: 140,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "#fff",
+      <CardMedia
+        component="img" height="160"
+        image={image || "https://via.placeholder.com/160?text=No+Image"}
+        alt={name}
+        sx={{ objectFit: "contain", p: 1, background: "#fff" }}
+      />
+      
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', height: '2.8em', overflow: 'hidden' }}>
+          {name}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">{brand}</Typography>
+        <Typography variant="h6" color="error" sx={{ mt: 'auto', mb: 1 }}>
+          {Number(price).toLocaleString()} đ
+        </Typography>
+
+        <Button 
+          variant="contained" startIcon={<AddShoppingCartIcon />} fullWidth
+          onClick={(e) => {
+            e.stopPropagation(); 
+            onAddToCart(product);
           }}
         >
-          <span style={{ color: "#999" }}>No image</span>
-        </div>
-      )}
-      <CardContent>
-        <Typography variant="h6">{name}</Typography>
-        {brand && <Typography color="text.secondary">{brand}</Typography>}
-        <Typography color="primary">{priceNumber.toLocaleString()} VND</Typography>
+          Thêm vào giỏ
+        </Button>
       </CardContent>
     </Card>
   );

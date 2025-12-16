@@ -146,7 +146,9 @@ const ProductList: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 24 }}>
                 {products.map((p: Product, index: number) => (
                     <div key={p?.maSanPham ?? index}>
-                        <ProductCard product={p} />
+                        <ProductCard product={p} onAddToCart={function (product: Product): void {
+                            throw new Error("Function not implemented.");
+                        } } />
                     </div>
                 ))}
             </div>

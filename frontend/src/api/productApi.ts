@@ -5,6 +5,12 @@ const BASE_URL = "http://localhost:8080/api/products";
 
 // --- INTERFACE PRODUCT TRÙNG KHỚP VỚI JSON TRẢ VỀ ---
 export interface Product {
+  moTa: string;
+  gia: any;
+  hinhAnh: any;
+  thuongHieu: any;
+  tenSanPham: any;
+  maSanPham: number;
   id: number;
   name: string;
   brand: string;
