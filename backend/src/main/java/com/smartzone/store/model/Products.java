@@ -41,97 +41,34 @@ public class Products {
 
     public Products() {}
 
-    public Products(String name, Long price, String brand, String image,
-                    Integer year, String description, String color, String status,
-                    java.sql.Date releaseDate, Integer stock, Category category) {
-        this.name = name;
-        this.price = price;
-        this.brand = brand;
-        this.image = image;
-        this.description = description;
-        this.color = color;
-        this.status = status;
-        this.stock = stock;
-        this.category = category;
-    }
-
     // GETTERS & SETTERS
-    public Integer getId() {
-        return id;
-    }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {   // ✅ chuẩn hóa tên method
-        return name;
-    }
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getImage() { return image; }
+    public void setImage(String image) { this.image = image; }
 
-    public String getBrand() {
-        return brand;
-    }
+    public Long getPrice() { return price; }
+    public void setPrice(Long price) { this.price = price; }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getImage() {
-        return image;
-    }
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
 
-    public void setImage(String image) {
-        this.image = image;
-    }
-    public Long getPrice() {
-        return price;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public void setPrice(Long price) {
-        this.price = price;
-    }
+    public Integer getStock() { return stock; }
+    public void setStock(Integer stock) { this.stock = stock; }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 }
