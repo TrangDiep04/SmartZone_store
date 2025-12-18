@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext'; // Đã đổi tên thành .tsx
+import { AuthContext } from '../context/AuthContext'; 
 
 // Hook để dễ dàng truy cập vào các giá trị (isLoggedIn, userRole, login, logout)
 const useAuth = () => {
