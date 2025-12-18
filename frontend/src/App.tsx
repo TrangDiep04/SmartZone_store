@@ -8,7 +8,9 @@ import ProductList from './components/UI/ProductList';
 import Header from './components/UI/Header';
 import Footer from './components/UI/Footer';
 import ProductDetail from './pages/User/ProductDetail';
-import Cart from './pages/User/Cart'; // thêm giỏ hàng
+import Cart from './pages/User/Cart';
+import Order from "./pages/User/order/Order";
+import Orders from "./pages/User/OrderList";
 import './styles/layout.css';
 
 function App() {
@@ -55,6 +57,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Cart />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/order" element={<Order />} />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <Orders />
                 </ProtectedRoute>
               }
             />

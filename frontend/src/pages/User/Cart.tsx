@@ -243,18 +243,22 @@ const Cart: React.FC = () => {
                 {total.toLocaleString()}đ
               </span>
             </h3>
-            <button 
+            <button
               disabled={selectedIds.length === 0}
-              style={{ 
-                marginTop: "20px", 
-                padding: "15px 50px", 
-                backgroundColor: selectedIds.length === 0 ? "#ccc" : "#ee4d2d", // Màu cam Shopee
-                color: "white", 
-                border: "none", 
-                borderRadius: "4px", 
-                fontSize: "1.1rem", 
-                fontWeight: "bold", 
-                cursor: selectedIds.length === 0 ? "not-allowed" : "pointer" 
+              onClick={() => {
+                localStorage.setItem("selectedIds", JSON.stringify(selectedIds));
+                window.location.href = "/order";
+              }}
+              style={{
+                marginTop: "20px",
+                padding: "15px 50px",
+                backgroundColor: selectedIds.length === 0 ? "#ccc" : "#ee4d2d",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "1.1rem",
+                fontWeight: "bold",
+                cursor: selectedIds.length === 0 ? "not-allowed" : "pointer"
               }}
             >
               MUA HÀNG
