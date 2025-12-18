@@ -1,13 +1,18 @@
 package com.smartzone.store.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@Table(name = "orders")
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
 
     private String receiverName;
     private String receiverPhone;
@@ -17,7 +22,9 @@ public class Order {
     private String status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<OrderItem> items;
+
     public Order() {}
     // Getters và setters
     public String getReceiverName() { return receiverName; }
