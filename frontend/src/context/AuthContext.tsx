@@ -1,64 +1,68 @@
-import React, { createContext, useState, useEffect, type ReactNode } from 'react';
-import authService from '../api/authService'; // Đã đổi tên thành .ts
+import React, { createContext, useState, useContext, type ReactNode } from 'react';
+import authService, { type LoginResponse } from '../api/authService';
 
-type UserRole = 'Admin' | 'User' | null;
-
-// Định nghĩa kiểu cho Context
 interface AuthContextType {
-    isLoggedIn: boolean;
-    userRole: UserRole;
-    isLoading: boolean;
-    login: (tenDangNhap: string, matKhau: string) => Promise<UserRole>;
-    logout: () => void;
+  isLoggedIn: boolean;
+  userRole: string | null;
+  userName: string | null;
+  login: (tenDangNhap: string, matKhau: string) => Promise<string>;
+  logout: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-    children: ReactNode;
-}
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const getSafeValue = (key: string) => {
+    const val = localStorage.getItem(key);
+    return (val && val !== "undefined" && val !== "null") ? val : null;
+  };
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    // Kiểu cho useState
-    const [userRole, setUserRole] = useState<UserRole>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!getSafeValue('token'));
+  const [userRole, setUserRole] = useState(getSafeValue('userRole'));
+  const [userName, setUserName] = useState(getSafeValue('userName'));
 
-    // Kiểm tra trạng thái khi Component mount (tải lại trang)
-    useEffect(() => {
-        const role = localStorage.getItem('userRole') as UserRole;
-        if (role) {
-            setUserRole(role);
-        }
-        setIsLoading(false);
-    }, []);
+  const login = async (tenDangNhap: string, matKhau: string): Promise<string> => {
+    try {
+      const data: LoginResponse = await authService.login(tenDangNhap, matKhau);
+      
+      const displayName = data.hoTen || data.tenDangNhap || "Thành viên";
+      // Đảm bảo lấy đúng phanQuyen từ backend
+      const role = data.phanQuyen; 
 
-    const login = async (tenDangNhap: string, matKhau: string): Promise<UserRole> => {
-        const data = await authService.login(tenDangNhap, matKhau);
-        setUserRole(data.phanQuyen);
-        return data.phanQuyen; 
-    };
+      // BƯỚC QUAN TRỌNG: Lưu vào localStorage TRƯỚC khi cập nhật State
+      localStorage.setItem('token', data.token || 'secret-token');
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('userName', displayName);
 
-    const logout = () => {
-        authService.logout();
-        setUserRole(null);
-    };
+      // Cập nhật State
+      setIsLoggedIn(true);
+      setUserRole(role);
+      setUserName(displayName);
 
-    const value: AuthContextType = {
-        isLoggedIn: !!userRole,
-        userRole,
-        isLoading,
-        login,
-        logout
-    };
-
-    // Hiển thị trạng thái chờ khi đang kiểm tra LocalStorage
-    if (isLoading) {
-        return <div style={{textAlign: 'center', padding: '50px', fontSize: '1.2em', color: '#007bff'}}>Đang tải dữ liệu xác thực...</div>;
+      return role; // Trả về role để LoginPage dùng navigate
+    } catch (error) {
+      console.error("Login Context Error:", error);
+      throw error;
     }
+  };
 
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
+  const logout = () => {
+    authService.logout(); // Gọi hàm logout từ service (xử lý redirect nếu cần)
+    localStorage.clear();
+    setIsLoggedIn(false);
+    setUserRole(null);
+    setUserName(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ isLoggedIn, userRole, userName, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+  return context;
 };

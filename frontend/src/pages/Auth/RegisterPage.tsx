@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import RegisterForm from '../../components/Auth/RegisterStep1'; 
 import OtpVerification from '../../components/Auth/RegisterStep2'; 
 import FinalRegistration from '../../components/Auth/RegisterStep3'; 
-import '../../LoginPage.css'; 
+import "../../styles/LoginPage.css";
 
 interface RegisterData {
     tenDangNhap: string;
