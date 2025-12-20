@@ -10,6 +10,7 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [mainImage, setMainImage] = useState<string>("");
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -19,6 +20,8 @@ const ProductDetail: React.FC = () => {
         if (id) {
           const res = await productApi.getById(Number(id));
           setProduct(res);
+          const defaultImage = res.image || "";
+          setMainImage(defaultImage);
         }
       } catch (err) {
         setError('Không thể tải chi tiết sản phẩm');
@@ -29,15 +32,12 @@ const ProductDetail: React.FC = () => {
     fetchProduct();
   }, [id]);
 
-  const getProductId = (p: Product) => p.maSanPham || (p as any).id;
+  const getProductId = (p: Product) => p.id || (p as any).maSanPham;
 
-  // ✅ THÊM VÀO GIỎ (có alert)
   const handleAddToCart = () => {
     if (!product) return;
-
     const savedCart = localStorage.getItem('cart');
     const currentCart: Product[] = savedCart ? JSON.parse(savedCart) : [];
-
     const productId = getProductId(product);
     const existingIndex = currentCart.findIndex(
       (item) => getProductId(item) === productId
@@ -46,26 +46,20 @@ const ProductDetail: React.FC = () => {
     if (existingIndex !== -1) {
       currentCart[existingIndex].quantity =
         (currentCart[existingIndex].quantity || 1) + 1;
-      localStorage.setItem('cart', JSON.stringify(currentCart));
     } else {
-      localStorage.setItem('cart', JSON.stringify([
-        ...currentCart,
-        { ...product, quantity: 1 }
-      ]));
+      currentCart.push({ ...product, quantity: 1 });
     }
 
-    const productName = product.tenSanPham || (product as any).name || "Sản phẩm";
+    localStorage.setItem('cart', JSON.stringify(currentCart));
+    const productName = product.name || "Sản phẩm";
     alert(`Đã thêm "${productName}" vào giỏ hàng!`);
     window.dispatchEvent(new Event("storage"));
   };
 
-  // ✅ MUA NGAY (không alert, không trùng)
   const handleBuyNow = () => {
     if (!product) return;
-
     const savedCart = localStorage.getItem('cart');
     const currentCart: Product[] = savedCart ? JSON.parse(savedCart) : [];
-
     const productId = getProductId(product);
     const existingIndex = currentCart.findIndex(
       (item) => getProductId(item) === productId
@@ -74,14 +68,11 @@ const ProductDetail: React.FC = () => {
     if (existingIndex !== -1) {
       currentCart[existingIndex].quantity =
         (currentCart[existingIndex].quantity || 1) + 1;
-      localStorage.setItem('cart', JSON.stringify(currentCart));
     } else {
-      localStorage.setItem('cart', JSON.stringify([
-        ...currentCart,
-        { ...product, quantity: 1 }
-      ]));
+      currentCart.push({ ...product, quantity: 1 });
     }
 
+    localStorage.setItem('cart', JSON.stringify(currentCart));
     localStorage.setItem("selectedIds", JSON.stringify([productId]));
     navigate("/order");
   };
@@ -90,21 +81,57 @@ const ProductDetail: React.FC = () => {
   if (error) return <div style={{ padding: 20, color: 'red' }}>{error}</div>;
   if (!product) return <div style={{ padding: 20 }}>Không tìm thấy sản phẩm</div>;
 
-  const name = product.tenSanPham || (product as any).name || "Không rõ tên";
-  const price = product.gia || (product as any).price || 0;
-  const image = product.hinhAnh || (product as any).image || "";
-  const brand = product.thuongHieu || (product as any).brand || "Đang cập nhật";
-  const description = product.moTa || (product as any).description || "Đang cập nhật mô tả...";
+  const { name, brand, price, description, image, image2, image3, image4, image5, stock } = product;
+
+  const validDescription =
+    !description || description.trim() === "" || description.trim() === "Không có mô tả"
+      ? "Đang cập nhật mô tả..."
+      : description;
+
+  const splitDescription = (text: string): string[] => {
+    return text
+      .split(/(?<=[.!?])\s+/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+  };
+
+  // Bỏ ảnh nhỏ đầu tiên (image), chỉ lấy 4 ảnh còn lại
+  const thumbnails = [image2, image3, image4, image5].filter(Boolean);
 
   return (
     <div style={{ padding: 40, maxWidth: 1000, margin: '0 auto' }}>
       <div style={{ display: 'flex', gap: 40 }}>
         <div style={{ flex: '0 0 400px' }}>
           <img
-            src={image}
+            src={mainImage}
             alt={name}
-            style={{ width: '100%', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+            style={{
+              width: '100%',
+              borderRadius: 8,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              marginBottom: 20,
+            }}
           />
+          {thumbnails.length > 0 && (
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {thumbnails.map((thumb, index) => (
+                <img
+                  key={index}
+                  src={thumb}
+                  alt={`Ảnh ${index + 2}`} // bắt đầu từ ảnh 2
+                  onClick={() => setMainImage(thumb)}
+                  style={{
+                    width: 80,
+                    height: 80,
+                    objectFit: 'cover',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    border: thumb === mainImage ? '2px solid #1976d2' : '1px solid #ccc',
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <div style={{ flex: 1 }}>
@@ -113,6 +140,7 @@ const ProductDetail: React.FC = () => {
             {Number(price).toLocaleString()} VNĐ
           </p>
           <p><strong>Thương hiệu:</strong> {brand}</p>
+          <p><strong>Kho:</strong> {stock}</p>
 
           <div style={{ display: 'flex', gap: 15, marginTop: 30 }}>
             <button
@@ -152,8 +180,12 @@ const ProductDetail: React.FC = () => {
 
       <div style={{ marginTop: 40 }}>
         <h3>Mô tả sản phẩm</h3>
-        <p style={{ whiteSpace: 'pre-line', lineHeight: '1.6' }}>
-          {showFullDescription ? description : `${description.slice(0, 500)}...`}
+        <div style={{ lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+          {showFullDescription
+            ? splitDescription(validDescription).map((line, index) => (
+                <p key={index}>{line}</p>
+              ))
+            : `${validDescription.slice(0, 500)}...`}
           <button
             onClick={() => setShowFullDescription(!showFullDescription)}
             style={{
@@ -166,7 +198,7 @@ const ProductDetail: React.FC = () => {
           >
             {showFullDescription ? "Thu gọn" : "Xem thêm"}
           </button>
-        </p>
+        </div>
       </div>
     </div>
   );
