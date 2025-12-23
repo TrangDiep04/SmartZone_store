@@ -63,10 +63,8 @@ export const productApi = {
     const res = await axios.get(`${BASE_URL}/${id}`);
     return res.data;
   },
-<<<<<<< HEAD
-};
 
-=======
+
 //them vao chuc nang loc
 filterProducts: async (filters: {
     minPrice?: number;
@@ -79,4 +77,4 @@ filterProducts: async (filters: {
   },
 
 };
->>>>>>> e9736ddfc67e67ea46c35f60372d8cc76e13051f
+

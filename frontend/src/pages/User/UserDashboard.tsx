@@ -7,11 +7,7 @@ import ProductCard from "../../components/UI/ProductCard";
 import Sidebar from "../../components/UI/Sidebar";
 
 // Material UI
-<<<<<<< HEAD
-import { Paper, InputBase, IconButton, CircularProgress, Alert } from "@mui/material";
-=======
-import { Paper, InputBase, IconButton,Box,TextField,MenuItem,Select,FormControl,InputLabel,Button,Divider} from "@mui/material";
->>>>>>> e9736ddfc67e67ea46c35f60372d8cc76e13051f
+import { Paper, InputBase, IconButton,Box,TextField,MenuItem,Select,FormControl,InputLabel,Button,Divider, Alert, CircularProgress} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
 
@@ -202,11 +198,7 @@ const [minPrice, setMinPrice] = useState<string>("");
           </IconButton>
         </Paper>
 
-<<<<<<< HEAD
-        <h2 style={{ marginBottom: "20px", fontWeight: 600 }}>
-          {query ? `Kết quả cho "${query}"` : "Danh sách sản phẩm"}
-        </h2>
-=======
+
 {/* 2. CHÈN ĐOẠN NÀY VÀO ĐÂY (Giữa thanh tìm kiếm và tiêu đề h2) */}
         <Paper sx={{ p: 2, mb: 3, borderRadius: '8px', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', bgcolor: '#f5f5f5' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.8)', mr: 1 }}>
@@ -241,7 +233,6 @@ const [minPrice, setMinPrice] = useState<string>("");
 {/* 3. Tiêu đề h2 cũ của bạn */}
 
         <h2>{query ? `Kết quả cho "${query}"` : "Danh sách sản phẩm"}</h2>
->>>>>>> e9736ddfc67e67ea46c35f60372d8cc76e13051f
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
