@@ -6,8 +6,12 @@ import ProductCard from "../../components/UI/ProductCard";
 import Sidebar from "../../components/UI/Sidebar";
 
 // Material UI
-import { Paper, InputBase, IconButton } from "@mui/material";
+import { Paper, InputBase, IconButton,Box,TextField,MenuItem,Select,FormControl,InputLabel,Button,Divider} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+
+
+//them vao loc
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 const PAGE_SIZE = 21;
 
@@ -20,6 +24,36 @@ const UserDashboard: React.FC = () => {
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [query, setQuery] = useState<string>("");
+  //chen vao day chuc nang loc
+const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<string>("default");
+
+  const handleFilter = () => {
+      let filtered = [...allProducts];
+
+      // 1. Lọc giá
+      if (minPrice) {
+        filtered = filtered.filter(p => (p.price || (p as any).gia) >= Number(minPrice));
+      }
+      if (maxPrice) {
+        filtered = filtered.filter(p => (p.price || (p as any).gia) <= Number(maxPrice));
+      }
+
+      // 2. Sắp xếp
+      if (sortOrder === "priceAsc") {
+        filtered.sort((a, b) => (a.price || (a as any).gia) - (b.price || (b as any).gia));
+      } else if (sortOrder === "priceDesc") {
+        filtered.sort((a, b) => (b.price || (b as any).gia) - (a.price || (a as any).gia));
+      }
+
+      // 3. Cập nhật state (QUAN TRỌNG)
+      setAllProducts(filtered);
+      setTotalPages(Math.ceil(filtered.length / PAGE_SIZE));
+      setPage(0); // Về trang đầu tiên
+    };
+
+
 
   const addToCart = (product: Product) => {
     try {
@@ -146,6 +180,39 @@ const UserDashboard: React.FC = () => {
             <SearchIcon />
           </IconButton>
         </Paper>
+
+{/* 2. CHÈN ĐOẠN NÀY VÀO ĐÂY (Giữa thanh tìm kiếm và tiêu đề h2) */}
+        <Paper sx={{ p: 2, mb: 3, borderRadius: '8px', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', bgcolor: '#f5f5f5' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.8)', mr: 1 }}>
+              <FilterListIcon sx={{ mr: 0.5 }} />
+              <span style={{ fontWeight: 500 }}>Bộ lọc:</span>
+            </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <TextField size="small" placeholder="₫ TỪ" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} sx={{ width: 100, bgcolor: 'white' }} />
+              <Divider sx={{ width: 10, bgcolor: 'black' }} />
+              <TextField size="small" placeholder="₫ ĐẾN" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} sx={{ width: 100, bgcolor: 'white' }} />
+            </Box>
+
+            <FormControl size="small" sx={{ minWidth: 150, bgcolor: 'white' }}>
+              <InputLabel>Sắp xếp theo</InputLabel>
+              <Select value={sortOrder} label="Sắp xếp theo" onChange={(e) => setSortOrder(e.target.value)}>
+                <MenuItem value="default">Mặc định</MenuItem>
+                <MenuItem value="priceAsc">Giá: Thấp đến Cao</MenuItem>
+                <MenuItem value="priceDesc">Giá: Cao đến Thấp</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Button variant="contained" onClick={handleFilter} sx={{ bgcolor: '#ee4d2d', '&:hover': { bgcolor: '#d73211' }, textTransform: 'none' }}>
+              Áp dụng
+            </Button>
+
+            <Button size="small" sx={{ textTransform: 'none' }} onClick={() => { setMinPrice(""); setMaxPrice(""); setSortOrder("default"); fetchProducts(""); }}>
+              Xóa tất cả
+            </Button>
+          </Paper>
+
+{/* 3. Tiêu đề h2 cũ của bạn */}
 
         <h2>{query ? `Kết quả cho "${query}"` : "Danh sách sản phẩm"}</h2>
 
