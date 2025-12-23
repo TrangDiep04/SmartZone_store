@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { cartApi, type CartItemResponse } from '../../api/cartApi';
-import { useAuth } from '../../context/AuthContext'; // Dùng để lấy userId
+import { useAuth } from '../../context/AuthContext';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Box, Typography, Button } from '@mui/material';
 
 const Cart: React.FC = () => {
   const { userId, isLoggedIn } = useAuth();
@@ -12,58 +11,50 @@ const Cart: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. Tải giỏ hàng từ Backend
-  const loadCart = async () => {
+  // Dùng useCallback để tránh re-render vô tận
+  const loadCart = useCallback(async () => {
+    // Nếu chưa đăng nhập hoặc chưa có userId thì dừng lại ngay
     if (!isLoggedIn || !userId) {
       setLoading(false);
       return;
     }
+
     try {
       setLoading(true);
+      console.log("Đang tải giỏ hàng cho User ID:", userId);
       const data = await cartApi.getCart(Number(userId));
-      setCartItems(data);
+      
+      // KIỂM TRA: Nếu API trả về null hoặc không phải mảng, set mảng rỗng
+      setCartItems(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Lỗi tải giỏ hàng:", err);
+      console.error("Lỗi khi fetch giỏ hàng:", err);
+      setCartItems([]); // Reset về rỗng nếu lỗi
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, isLoggedIn]);
 
   useEffect(() => {
     loadCart();
-  }, [userId]);
+  }, [loadCart]);
 
-  // 2. Thay đổi số lượng (Cộng/Trừ)
+  // Xử lý thay đổi số lượng
   const handleQuantityChange = async (maSanPham: number, delta: number) => {
     try {
-      // Backend của bạn dùng logic cộng dồn: soLuong hiện tại + delta
       await cartApi.addToCart(Number(userId), maSanPham, delta);
-      loadCart(); // Tải lại để đồng bộ
+      await loadCart(); // Load lại ngay để thấy thay đổi
     } catch (err) {
-      alert("Không thể cập nhật số lượng");
+      alert("Lỗi cập nhật số lượng");
     }
   };
 
-  // 3. Xóa sản phẩm
   const removeItem = async (maSanPham: number) => {
-    if (!window.confirm("Bạn muốn xóa sản phẩm này?")) return;
+    if (!window.confirm("Xóa sản phẩm này khỏi giỏ?")) return;
     try {
       await cartApi.removeFromCart(Number(userId), maSanPham);
-      loadCart();
+      await loadCart();
     } catch (err) {
-      alert("Lỗi khi xóa sản phẩm");
-    }
-  };
-
-  const toggleSelect = (id: number) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.length === cartItems.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(cartItems.map(item => item.maSanPham));
+      alert("Lỗi khi xóa");
     }
   };
 
@@ -71,86 +62,73 @@ const Cart: React.FC = () => {
     .filter(item => selectedIds.includes(item.maSanPham))
     .reduce((sum, item) => sum + (item.gia * item.soLuong), 0);
 
-  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><CircularProgress /></div>;
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+      <CircularProgress />
+    </Box>
+  );
 
   return (
-    <div style={{ padding: "60px 20px", maxWidth: "1000px", margin: "0 auto", backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-      <div style={{ background: '#fff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', overflow: 'hidden', border: '1px solid #edf2f7' }}>
+    <div style={{ padding: "60px 20px", maxWidth: "1000px", margin: "0 auto", minHeight: '100vh' }}>
+      <div style={{ background: '#fff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         
-        <div style={{ padding: '30px', borderBottom: '1px solid #f1f1f1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <ShoppingCartOutlinedIcon /> Giỏ hàng trực tuyến
-            </h2>
-            <p style={{ margin: '5px 0 0 0', color: '#a0aec0', fontSize: '0.9rem' }}>Bạn có {cartItems.length} sản phẩm lưu trên hệ thống</p>
-          </div>
+        <div style={{ padding: '30px', borderBottom: '1px solid #f1f1f1' }}>
+           <Typography variant="h5" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
+             <ShoppingCartOutlinedIcon /> Giỏ hàng của bạn
+           </Typography>
         </div>
 
         {!isLoggedIn ? (
-           <div style={{ textAlign: "center", padding: "50px" }}>Vui lòng đăng nhập để xem giỏ hàng</div>
+            <Box sx={{ p: 10, textAlign: 'center' }}>Vui lòng đăng nhập để xem giỏ hàng</Box>
         ) : cartItems.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "100px 20px" }}>
-            <div style={{ fontSize: '50px', marginBottom: '20px' }}>🛒</div>
-            <p style={{ color: '#718096' }}>Giỏ hàng trống!</p>
-            <button onClick={() => window.location.href = '/'} style={{ marginTop: '25px', padding: '12px 30px', backgroundColor: '#1a202c', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>Mua sắm ngay</button>
-          </div>
+          <Box sx={{ p: 10, textAlign: 'center' }}>
+            <Typography variant="h1" sx={{ fontSize: 60 }}>🛒</Typography>
+            <Typography sx={{ color: '#718096', mt: 2 }}>Giỏ hàng hiện đang trống!</Typography>
+            <Button variant="contained" href="/" sx={{ mt: 3, borderRadius: 2 }}>Tiếp tục mua sắm</Button>
+          </Box>
         ) : (
-          <div style={{ padding: '0 30px' }}>
-            <div style={{ display: 'flex', padding: '20px 0', color: '#718096', fontSize: '0.85rem', fontWeight: 600, borderBottom: '1px solid #f8fafc' }}>
-              <div style={{ width: '40px' }}>
-                <input type="checkbox" checked={selectedIds.length === cartItems.length} onChange={toggleSelectAll} style={{ width: '18px', height: '18px' }} />
-              </div>
-              <div style={{ flex: 2 }}>Sản phẩm</div>
-              <div style={{ flex: 1, textAlign: 'center' }}>Số lượng</div>
-              <div style={{ flex: 1, textAlign: 'right' }}>Thành tiền</div>
-            </div>
-
+          <div style={{ padding: '20px 30px' }}>
             {cartItems.map((item) => (
-              <div key={item.maSanPham} style={{ display: "flex", alignItems: "center", padding: "25px 0", borderBottom: "1px solid #f8fafc" }}>
-                <div style={{ width: '40px' }}>
-                  <input type="checkbox" checked={selectedIds.includes(item.maSanPham)} onChange={() => toggleSelect(item.maSanPham)} style={{ width: '18px', height: '18px' }} />
-                </div>
+              <div key={item.maSanPham} style={{ display: "flex", alignItems: "center", padding: "20px 0", borderBottom: "1px solid #f8fafc" }}>
+                <input 
+                    type="checkbox" 
+                    checked={selectedIds.includes(item.maSanPham)} 
+                    onChange={() => setSelectedIds(prev => prev.includes(item.maSanPham) ? prev.filter(id => id !== item.maSanPham) : [...prev, item.maSanPham])}
+                    style={{ width: 20, height: 20, marginRight: 20 }}
+                />
                 
-                <div style={{ flex: 2, display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <img src={item.hinhAnh} alt="" style={{ width: '70px', height: '70px', borderRadius: '12px', objectFit: 'contain', background: '#f8f9fa' }} />
-                  <div>
-                    <h4 style={{ margin: '0 0 5px 0', color: '#2d3748' }}>{item.tenSanPham}</h4>
-                    <div style={{ color: '#718096' }}>{item.gia.toLocaleString()}đ</div>
-                  </div>
-                </div>
+                <img src={item.hinhAnh} alt={item.tenSanPham} style={{ width: 80, height: 80, borderRadius: 10, objectFit: 'contain' }} />
+                
+                <Box sx={{ flex: 1, ml: 3 }}>
+                  <Typography sx={{ fontWeight: 600 }}>{item.tenSanPham}</Typography>
+                  <Typography color="textSecondary">{item.gia?.toLocaleString()}đ</Typography>
+                </Box>
 
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', background: '#f7fafc', borderRadius: '10px', padding: '5px' }}>
-                    <button onClick={() => handleQuantityChange(item.maSanPham, -1)} style={{ width: '30px', border: 'none', background: '#fff', cursor: 'pointer' }}>-</button>
-                    <span style={{ width: '40px', textAlign: 'center', fontWeight: 600 }}>{item.soLuong}</span>
-                    <button onClick={() => handleQuantityChange(item.maSanPham, 1)} style={{ width: '30px', border: 'none', background: '#fff', cursor: 'pointer' }}>+</button>
-                  </div>
-                </div>
+                <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#f1f3f5', borderRadius: 2, p: 0.5 }}>
+                  <button onClick={() => handleQuantityChange(item.maSanPham, -1)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '0 10px' }}>-</button>
+                  <span style={{ minWidth: 30, textAlign: 'center', fontWeight: 'bold' }}>{item.soLuong}</span>
+                  <button onClick={() => handleQuantityChange(item.maSanPham, 1)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '0 10px' }}>+</button>
+                </Box>
 
-                <div style={{ flex: 1, textAlign: 'right' }}>
-                  <div style={{ fontWeight: 800, color: '#1a202c' }}>{(item.gia * item.soLuong).toLocaleString()}đ</div>
-                  <button onClick={() => removeItem(item.maSanPham)} style={{ border: 'none', background: 'none', color: '#cbd5e0', cursor: 'pointer' }}>
-                    <DeleteOutlineIcon fontSize="small" />
-                  </button>
-                </div>
+                <Box sx={{ width: 150, textAlign: 'right', fontWeight: 800 }}>
+                  {(item.gia * item.soLuong).toLocaleString()}đ
+                  <IconButton onClick={() => removeItem(item.maSanPham)} color="error"><DeleteOutlineIcon /></IconButton>
+                </Box>
               </div>
             ))}
-          </div>
-        )}
 
-        {cartItems.length > 0 && (
-          <div style={{ padding: '30px', background: '#fcfcfd', borderTop: '1px solid #f1f1f1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ textAlign: 'right', width: '100%' }}>
-              <div style={{ color: '#718096', fontSize: '0.9rem' }}>Tổng thanh toán ({selectedIds.length} mục)</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#e53e3e', marginBottom: '20px' }}>{total.toLocaleString()}đ</div>
-              <button 
+            <Box sx={{ p: 4, textAlign: 'right', bgcolor: '#fcfcfd' }}>
+              <Typography variant="h6">Tổng thanh toán: <span style={{ color: '#e53e3e', fontSize: '1.8rem' }}>{total.toLocaleString()}đ</span></Typography>
+              <Button 
+                variant="contained" 
+                size="large"
                 disabled={selectedIds.length === 0}
-                onClick={() => { localStorage.setItem("checkoutItems", JSON.stringify(selectedIds)); window.location.href = "/order"; }}
-                style={{ padding: '12px 45px', borderRadius: '12px', border: 'none', background: selectedIds.length === 0 ? '#cbd5e0' : '#1a202c', color: '#fff', fontWeight: 700, cursor: 'pointer' }}
+                sx={{ mt: 3, px: 6, py: 1.5, borderRadius: 3, bgcolor: '#1a202c' }}
+                onClick={() => { localStorage.setItem("checkout", JSON.stringify(selectedIds)); window.location.href = "/order"; }}
               >
-                THANH TOÁN NGAY
-              </button>
-            </div>
+                ĐẶT HÀNG NGAY
+              </Button>
+            </Box>
           </div>
         )}
       </div>
