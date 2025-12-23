@@ -64,3 +64,4 @@ export const productApi = {
     return res.data;
   },
 };
+
