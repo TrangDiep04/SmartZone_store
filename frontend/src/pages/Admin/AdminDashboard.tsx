@@ -1,37 +1,39 @@
-import React from 'react';
-import useAuth from '../../hooks/useAuth'; 
-import Header from '../../components/UI/Header';
+import React, { useState } from 'react';
 import AdminProductManager from './AdminProductManager';
 
 const AdminDashboard: React.FC = () => {
-    const { userRole } = useAuth();
+    const [activeTab, setActiveTab] = useState<'products' | 'stats'>('products');
 
     return (
-        <div style={{ backgroundColor: '#f4f7f6', minHeight: '100vh' }}>
-            <Header />
-            <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-                {/* Khu vực thông báo Admin */}
-                <div style={{ 
-                    padding: '20px', 
-                    borderLeft: '5px solid #dc3545', 
-                    marginBottom: '30px', 
-                    borderRadius: '4px', 
-                    backgroundColor: 'white',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }}>
-                    <h1 style={{ margin: 0, color: '#2d3436' }}>🛡️ Hệ thống Quản trị SmartZone</h1>
-                    <p style={{ margin: '10px 0 0', color: '#636e72' }}>
-                        Chào mừng <strong>Admin</strong>. Vai trò hiện tại: <span style={{ color: '#d63031' }}>{userRole}</span>
-                    </p>
+        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f7f6' }}>
+            {/* SIDEBAR */}
+            <div style={{ width: '260px', backgroundColor: '#2c3e50', color: 'white' }}>
+                <div style={{ padding: '30px 20px', fontSize: '1.5rem', fontWeight: 'bold', borderBottom: '1px solid #34495e' }}>
+                    SmartZone Admin
                 </div>
+                <nav style={{ padding: '20px 0' }}>
+                    <div onClick={() => setActiveTab('products')} style={{...navItem, backgroundColor: activeTab === 'products' ? '#34495e' : ''}}>
+                        📦 Quản lý Sản phẩm
+                    </div>
+                    <div onClick={() => setActiveTab('stats')} style={{...navItem, backgroundColor: activeTab === 'stats' ? '#34495e' : ''}}>
+                        📊 Thống kê báo cáo
+                    </div>
+                </nav>
+            </div>
 
-                {/* Hiển thị Component quản lý sản phẩm */}
-                <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-                    <AdminProductManager />
+            {/* MAIN CONTENT */}
+            <div style={{ flex: 1, padding: '30px' }}>
+                <header style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between' }}>
+                    <h1 style={{ margin: 0 }}>{activeTab === 'products' ? 'Sản phẩm' : 'Thống kê'}</h1>
+                </header>
+                
+                <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                    {activeTab === 'products' ? <AdminProductManager /> : <div>Biểu đồ đang cập nhật...</div>}
                 </div>
             </div>
         </div>
     );
 };
 
+const navItem: React.CSSProperties = { padding: '15px 25px', cursor: 'pointer', transition: '0.3s' };
 export default AdminDashboard;
