@@ -1,0 +1,44 @@
+/* Footer tràn ngang hết màn hình */
+.minimal-footer {
+    width: 100% !important;
+    background-color: #1a1c1e; /* Màu đồng nhất với Header */
+    color: #888;
+    padding: 12px 0; /* Giảm padding để thanh footer mỏng và bé lại */
+    border-top: 1px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-top: auto; /* Đảm bảo luôn nằm dưới cùng trang */
+}
+
+/* Chỉnh dòng chữ bản quyền */
+.footer-copyright-only {
+    font-size: 0.8rem !important; /* Cỡ chữ bé lại cho tinh tế */
+    color: #888 !important;
+    letter-spacing: 0.5px;
+    margin: 0 !important;
+}
+
+/* Đảm bảo không có khoảng trắng thừa ở hai bên trang web */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+.minimal-footer {
+    width: 100vw !important; /* Sử dụng viewport width để lấy toàn bộ chiều ngang */
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    
+    background-color: #1a1c1e;
+    color: #888;
+    padding: 15px 0;
+    border-top: 1px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

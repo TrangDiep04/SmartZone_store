@@ -1,17 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth"; 
-import "../../LoginPage.css"; 
-
-// ✨ IMPORT CÁC THÀNH PHẦN CẦN THIẾT CỦA FONT AWESOME
+import "../../styles/LoginPage.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'; // faEye là mắt mở, faEyeSlash là mắt gạch chéo
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const LoginPage: React.FC = () => {
   const [tenDangNhap, setTenDangNhap] = useState<string>("");
   const [matKhau, setMatKhau] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  // Thêm trạng thái để quản lý việc hiển thị/ẩn mật khẩu
   const [showPassword, setShowPassword] = useState<boolean>(false); 
   
   const { login } = useAuth();
@@ -22,6 +19,7 @@ const LoginPage: React.FC = () => {
     setError(null);
 
     try {
+      // Đảm bảo hàm login trong AuthContext trả về giá trị string (Admin/User)
       const role = await login(tenDangNhap, matKhau);
 
       if (role === "Admin") {
@@ -29,16 +27,9 @@ const LoginPage: React.FC = () => {
       } else {
         navigate("/user/dashboard", { replace: true });
       }
-    } catch (err: unknown) {
-      const errorMessage =
-        typeof err === "string" ? err : "Đăng nhập thất bại. Vui lòng thử lại.";
-      setError(errorMessage);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Tên đăng nhập hoặc mật khẩu không đúng.");
     }
-  };
-
-  // Hàm toggle trạng thái hiển thị mật khẩu
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
   };
 
   return (
@@ -60,10 +51,8 @@ const LoginPage: React.FC = () => {
           />
         </div>
         
-        {/* ✨ THAY ĐỔI CHO MẬT KHẨU VÀ ICON FONT AWESOME */}
         <div className="input-field password-input-container"> 
           <input
-            // Dùng trạng thái showPassword để chuyển đổi type giữa 'text' và 'password'
             type={showPassword ? "text" : "password"} 
             placeholder="Mật khẩu"
             value={matKhau}
@@ -71,25 +60,16 @@ const LoginPage: React.FC = () => {
             required
           />
           <button
-            type="button" // Quan trọng: type="button" để không submit form
-            onClick={togglePasswordVisibility}
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
             className="password-toggle"
-            aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
           >
-            {/* Sử dụng FontAwesomeIcon */}
-            {showPassword ? (
-              <FontAwesomeIcon icon={faEyeSlash} /> // Biểu tượng mắt gạch chéo (Ẩn)
-            ) : (
-              <FontAwesomeIcon icon={faEye} />     // Biểu tượng mắt mở (Hiện)
-            )}
+            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
           </button>
         </div>
-        {/* KẾT THÚC THAY ĐỔI */}
 
         {error && <div className="error-message">{error}</div>}
-        <button type="submit" className="submit-button">
-          Đăng Nhập
-        </button>
+        <button type="submit" className="submit-button">Đăng Nhập</button>
       </form>
       <p className="register-link">
         Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>

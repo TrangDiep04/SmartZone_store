@@ -1,271 +1,137 @@
-import React, { useState, useEffect } from 'react';
-import { type Product } from '../../api/productApi';
+import React, { useState, useEffect, useCallback } from 'react';
+import { cartApi, type CartItemResponse } from '../../api/cartApi';
+import { useAuth } from '../../context/AuthContext';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'; // Icon xóa hàng loạt
-
-interface CartItem extends Product {
-  quantity: number;
-}
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import { CircularProgress, Box, Typography, Button } from '@mui/material';
 
 const Cart: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]); // Lưu mã sản phẩm được chọn
+  const { userId, isLoggedIn } = useAuth();
+  const [cartItems, setCartItems] = useState<CartItemResponse[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      const rawData: Product[] = JSON.parse(savedCart);
-      const groupedCart = rawData.reduce((acc: CartItem[], item: any) => {
-        const id = item.maSanPham || item.id;
-        const existingItem = acc.find(i => (i.maSanPham || (i as any).id) === id);
-        if (existingItem) {
-          existingItem.quantity = (existingItem.quantity || 1) + (item.quantity || 1);
-        } else {
-          acc.push({ ...item, quantity: item.quantity || 1 });
-        }
-        return acc;
-      }, []);
-      setCartItems(groupedCart);
-    }
-  }, []);
-
-  const updateLocalStorage = (newCart: CartItem[]) => {
-    setCartItems(newCart);
-    localStorage.setItem('cart', JSON.stringify(newCart));
-    window.dispatchEvent(new Event("storage"));
-  };
-
-  // Logic chọn sản phẩm
-  const toggleSelect = (id: string) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.length === cartItems.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(cartItems.map(item => (item.maSanPham || (item as any).id)));
-    }
-  };
-
-  // Xóa những sản phẩm đã chọn
-  const removeSelected = () => {
-    if (window.confirm(`Bạn có chắc muốn xóa ${selectedIds.length} sản phẩm đã chọn?`)) {
-      const newCart = cartItems.filter(item => !selectedIds.includes(item.maSanPham || (item as any).id));
-      updateLocalStorage(newCart);
-      setSelectedIds([]);
-    }
-  };
-
-  const handleQuantityChange = (index: number, delta: number) => {
-    const newCart = [...cartItems];
-    const newQty = (newCart[index].quantity || 1) + delta;
-    if (newQty > 0) {
-      newCart[index].quantity = newQty;
-      updateLocalStorage(newCart);
-    }
-  };
-
-  const handleInputChange = (index: number, value: string) => {
-    const newCart = [...cartItems];
-    if (value === "") {
-      newCart[index].quantity = 0;
-      setCartItems(newCart);
+  // Dùng useCallback để tránh re-render vô tận
+  const loadCart = useCallback(async () => {
+    // Nếu chưa đăng nhập hoặc chưa có userId thì dừng lại ngay
+    if (!isLoggedIn || !userId) {
+      setLoading(false);
       return;
     }
-    const num = parseInt(value);
-    if (!isNaN(num) && num >= 0) {
-      newCart[index].quantity = num;
-      setCartItems(newCart);
-      if (num > 0) {
-        localStorage.setItem('cart', JSON.stringify(newCart));
-        window.dispatchEvent(new Event("storage"));
-      }
+
+    try {
+      setLoading(true);
+      console.log("Đang tải giỏ hàng cho User ID:", userId);
+      const data = await cartApi.getCart(Number(userId));
+      
+      // KIỂM TRA: Nếu API trả về null hoặc không phải mảng, set mảng rỗng
+      setCartItems(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Lỗi khi fetch giỏ hàng:", err);
+      setCartItems([]); // Reset về rỗng nếu lỗi
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, isLoggedIn]);
+
+  useEffect(() => {
+    loadCart();
+  }, [loadCart]);
+
+  // Xử lý thay đổi số lượng
+  const handleQuantityChange = async (maSanPham: number, delta: number) => {
+    try {
+      await cartApi.addToCart(Number(userId), maSanPham, delta);
+      await loadCart(); // Load lại ngay để thấy thay đổi
+    } catch (err) {
+      alert("Lỗi cập nhật số lượng");
     }
   };
 
-  const handleInputBlur = (index: number) => {
-    const newCart = [...cartItems];
-    if (newCart[index].quantity <= 0) {
-      newCart[index].quantity = 1;
-      updateLocalStorage(newCart);
+  const removeItem = async (maSanPham: number) => {
+    if (!window.confirm("Xóa sản phẩm này khỏi giỏ?")) return;
+    try {
+      await cartApi.removeFromCart(Number(userId), maSanPham);
+      await loadCart();
+    } catch (err) {
+      alert("Lỗi khi xóa");
     }
   };
 
-  const removeFromCart = (idToRemove: string) => {
-    const newCart = cartItems.filter(item => (item.maSanPham || (item as any).id) !== idToRemove);
-    updateLocalStorage(newCart);
-    setSelectedIds(prev => prev.filter(id => id !== idToRemove));
-  };
-
-  // Tổng tiền chỉ tính trên những sản phẩm được chọn (giống Shopee)
   const total = cartItems
-    .filter(item => selectedIds.includes(item.maSanPham || (item as any).id))
-    .reduce((sum, item) => {
-      const price = item.gia || (item as any).price || 0;
-      return sum + (Number(price) * (item.quantity || 1));
-    }, 0);
+    .filter(item => selectedIds.includes(item.maSanPham))
+    .reduce((sum, item) => sum + (item.gia * item.soLuong), 0);
+
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+      <CircularProgress />
+    </Box>
+  );
 
   return (
-    <div style={{ padding: "40px 20px", maxWidth: "950px", margin: "0 auto" }}>
-      <h2 style={{ borderBottom: "3px solid #1976d2", paddingBottom: "15px", marginBottom: "30px" }}>
-        GIỎ HÀNG CỦA BẠN
-      </h2>
-
-      {cartItems.length > 0 && (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          padding: '15px 20px', 
-          background: '#fff', 
-          borderRadius: '8px', 
-          marginBottom: '15px',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <input 
-              type="checkbox" 
-              checked={selectedIds.length === cartItems.length && cartItems.length > 0}
-              onChange={toggleSelectAll}
-              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-            />
-            <span>Chọn tất cả ({cartItems.length})</span>
-          </div>
-          
-          {selectedIds.length > 0 && (
-            <button 
-              onClick={removeSelected}
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '5px', 
-                color: '#ff4d4f', 
-                border: 'none', 
-                background: 'none', 
-                cursor: 'pointer',
-                fontWeight: 'bold' 
-              }}
-            >
-              <DeleteSweepIcon /> Xóa mục đã chọn ({selectedIds.length})
-            </button>
-          )}
+    <div style={{ padding: "60px 20px", maxWidth: "1000px", margin: "0 auto", minHeight: '100vh' }}>
+      <div style={{ background: '#fff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+        
+        <div style={{ padding: '30px', borderBottom: '1px solid #f1f1f1' }}>
+           <Typography variant="h5" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
+             <ShoppingCartOutlinedIcon /> Giỏ hàng của bạn
+           </Typography>
         </div>
-      )}
-      
-      {cartItems.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "80px 0" }}>
-           <p style={{ color: '#666', fontSize: '1.1rem' }}>Giỏ hàng của bạn đang trống.</p>
-           <button 
-             onClick={() => window.location.href = '/'}
-             style={{ marginTop: '20px', padding: '10px 25px', backgroundColor: '#1976d2', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-           >
-             Tiếp tục mua sắm
-           </button>
-        </div>
-      ) : (
-        <>
-          <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
-            {cartItems.map((item, index) => {
-              const id = item.maSanPham || (item as any).id;
-              const name = item.tenSanPham || (item as any).name || "Sản phẩm";
-              const price = item.gia || (item as any).price || 0;
-              const image = item.hinhAnh || (item as any).image || "";
-              const isSelected = selectedIds.includes(id);
 
-              return (
-                <div key={id} style={{ 
-                  display: "flex", 
-                  gap: "15px", 
-                  alignItems: "center", 
-                  padding: "20px", 
-                  borderBottom: "1px solid #eee",
-                  background: isSelected ? '#fafafa' : '#fff'
-                }}>
-                  {/* Checkbox cho từng hàng */}
-                  <input 
+        {!isLoggedIn ? (
+            <Box sx={{ p: 10, textAlign: 'center' }}>Vui lòng đăng nhập để xem giỏ hàng</Box>
+        ) : cartItems.length === 0 ? (
+          <Box sx={{ p: 10, textAlign: 'center' }}>
+            <Typography variant="h1" sx={{ fontSize: 60 }}>🛒</Typography>
+            <Typography sx={{ color: '#718096', mt: 2 }}>Giỏ hàng hiện đang trống!</Typography>
+            <Button variant="contained" href="/" sx={{ mt: 3, borderRadius: 2 }}>Tiếp tục mua sắm</Button>
+          </Box>
+        ) : (
+          <div style={{ padding: '20px 30px' }}>
+            {cartItems.map((item) => (
+              <div key={item.maSanPham} style={{ display: "flex", alignItems: "center", padding: "20px 0", borderBottom: "1px solid #f8fafc" }}>
+                <input 
                     type="checkbox" 
-                    checked={isSelected}
-                    onChange={() => toggleSelect(id)}
-                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                  />
+                    checked={selectedIds.includes(item.maSanPham)} 
+                    onChange={() => setSelectedIds(prev => prev.includes(item.maSanPham) ? prev.filter(id => id !== item.maSanPham) : [...prev, item.maSanPham])}
+                    style={{ width: 20, height: 20, marginRight: 20 }}
+                />
+                
+                <img src={item.hinhAnh} alt={item.tenSanPham} style={{ width: 80, height: 80, borderRadius: 10, objectFit: 'contain' }} />
+                
+                <Box sx={{ flex: 1, ml: 3 }}>
+                  <Typography sx={{ fontWeight: 600 }}>{item.tenSanPham}</Typography>
+                  <Typography color="textSecondary">{item.gia?.toLocaleString()}đ</Typography>
+                </Box>
 
-                  <img src={image} alt={name} style={{ width: 80, height: 80, objectFit: 'contain' }} />
-                  
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ margin: "0 0 5px 0", fontSize: '1rem' }}>{name}</h4>
-                    <div style={{ color: "#d32f2f", fontWeight: "bold" }}>{Number(price).toLocaleString()}đ</div>
-                  </div>
+                <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#f1f3f5', borderRadius: 2, p: 0.5 }}>
+                  <button onClick={() => handleQuantityChange(item.maSanPham, -1)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '0 10px' }}>-</button>
+                  <span style={{ minWidth: 30, textAlign: 'center', fontWeight: 'bold' }}>{item.soLuong}</span>
+                  <button onClick={() => handleQuantityChange(item.maSanPham, 1)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '0 10px' }}>+</button>
+                </Box>
 
-                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #ddd', borderRadius: '4px' }}>
-                    <button onClick={() => handleQuantityChange(index, -1)} style={{ padding: '5px 10px', border: 'none', background: '#f5f5f5', cursor: 'pointer' }}>-</button>
-                    <input 
-                      type="text" 
-                      value={item.quantity === 0 ? "" : item.quantity} 
-                      onChange={(e) => handleInputChange(index, e.target.value)}
-                      onBlur={() => handleInputBlur(index)}
-                      style={{ width: '40px', textAlign: 'center', border: 'none', outline: 'none' }}
-                    />
-                    <button onClick={() => handleQuantityChange(index, 1)} style={{ padding: '5px 10px', border: 'none', background: '#f5f5f5', cursor: 'pointer' }}>+</button>
-                  </div>
+                <Box sx={{ width: 150, textAlign: 'right', fontWeight: 800 }}>
+                  {(item.gia * item.soLuong).toLocaleString()}đ
+                  <IconButton onClick={() => removeItem(item.maSanPham)} color="error"><DeleteOutlineIcon /></IconButton>
+                </Box>
+              </div>
+            ))}
 
-                  <div style={{ textAlign: "right", minWidth: "110px" }}>
-                    <div style={{ fontWeight: "bold", color: isSelected ? '#d32f2f' : '#333' }}>
-                      {(Number(price) * (item.quantity || 1)).toLocaleString()}đ
-                    </div>
-                    <button
-                      onClick={() => removeFromCart(id)}
-                      style={{ background: 'none', border: 'none', color: '#ccc', cursor: 'pointer', marginTop: '10px' }}
-                    >
-                      <DeleteOutlineIcon onMouseOver={(e) => (e.currentTarget.style.color = '#ff4d4f')} onMouseOut={(e) => (e.currentTarget.style.color = '#ccc')} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            <Box sx={{ p: 4, textAlign: 'right', bgcolor: '#fcfcfd' }}>
+              <Typography variant="h6">Tổng thanh toán: <span style={{ color: '#e53e3e', fontSize: '1.8rem' }}>{total.toLocaleString()}đ</span></Typography>
+              <Button 
+                variant="contained" 
+                size="large"
+                disabled={selectedIds.length === 0}
+                sx={{ mt: 3, px: 6, py: 1.5, borderRadius: 3, bgcolor: '#1a202c' }}
+                onClick={() => { localStorage.setItem("checkout", JSON.stringify(selectedIds)); window.location.href = "/order"; }}
+              >
+                ĐẶT HÀNG NGAY
+              </Button>
+            </Box>
           </div>
-
-          <div style={{ 
-            marginTop: "30px", 
-            padding: "25px", 
-            background: "#fff", 
-            borderRadius: "12px", 
-            textAlign: "right", 
-            boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-            position: 'sticky',
-            bottom: '20px' // Thanh tổng tiền dính dưới màn hình giống Shopee
-          }}>
-            <h3 style={{ margin: 0 }}>
-              Tổng thanh toán ({selectedIds.length} sản phẩm): 
-              <span style={{ color: "#d32f2f", fontSize: '1.8rem', marginLeft: '10px' }}>
-                {total.toLocaleString()}đ
-              </span>
-            </h3>
-            <button
-              disabled={selectedIds.length === 0}
-              onClick={() => {
-                localStorage.setItem("selectedIds", JSON.stringify(selectedIds));
-                window.location.href = "/order";
-              }}
-              style={{
-                marginTop: "20px",
-                padding: "15px 50px",
-                backgroundColor: selectedIds.length === 0 ? "#ccc" : "#ee4d2d",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                fontSize: "1.1rem",
-                fontWeight: "bold",
-                cursor: selectedIds.length === 0 ? "not-allowed" : "pointer"
-              }}
-            >
-              MUA HÀNG
-            </button>
-          </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 };

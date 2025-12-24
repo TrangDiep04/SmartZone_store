@@ -1,104 +1,59 @@
-import { Routes, Route } from 'react-router-dom';
-import LoginPage from './pages/Auth/LoginPage.tsx';
-import RegisterPage from './pages/Auth/RegisterPage.tsx';
-import ProtectedRoute from './components/Auth/ProtectedRoute.tsx';
-import AdminDashboard from './pages/Admin/AdminDashboard.tsx';
-import UserDashboard from './pages/User/UserDashboard';
-import ProductList from './components/UI/ProductList';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/UI/Header';
 import Footer from './components/UI/Footer';
+import LoginPage from './pages/Auth/LoginPage';
+import RegisterPage from './pages/Auth/RegisterPage';
+import UserDashboard from './pages/User/UserDashboard';
 import ProductDetail from './pages/User/ProductDetail';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Cart from './pages/User/Cart';
-import Order from "./pages/User/order/Order";
-import Orders from "./pages/User/OrderList";
-import './styles/layout.css';
+import Order from './pages/User/order/Order';
+import Orders from './pages/User/OrderList';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import Snowfall from './components/UI/Snowfall'; // <— Thêm dòng này
+import './App.css';
 
 function App() {
+  const location = useLocation();
+  const isAuthPage = ['/login', '/register'].includes(location.pathname);
+
   return (
     <div className="app-root">
-      <header className="app-header">
-        <Header />
-      </header>
+      {/* Nền tuyết — để dưới header/footer nhưng trên nền */}
+      {!isAuthPage && <Snowfall count={160} speed={1} maxSize={3} />}
+
+      {!isAuthPage && (
+        <header className="app-header">
+          <Header />
+        </header>
+      )}
 
       <main className="app-main">
-        <div className="app-container">
-          <Routes>
-            {/* Tuyến công khai */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+        <Routes>
+          <Route path="/" element={<UserDashboard />} />
+          <Route path="/user/dashboard" element={<UserDashboard />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
 
-            {/* Trang chính (UserDashboard as root) */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <UserDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/user/dashboard"
-              element={
-                <ProtectedRoute>
-                  <UserDashboard />
-                </ProtectedRoute>
-              }
-            />
+          <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+          <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
 
-            {/* Public product listing */}
-            <Route path="/products" element={<ProductList />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requiredRole="Admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-            {/* Trang chi tiết sản phẩm */}
-            <Route path="/products/:id" element={<ProductDetail />} />
-
-            {/* Trang giỏ hàng */}
-            <Route
-              path="/cart"
-              element={
-                <ProtectedRoute>
-                  <Cart />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/order" element={<Order />} />
-            <Route
-              path="/orders"
-              element={
-                <ProtectedRoute>
-                  <Orders />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Tuyến đặc biệt (Chỉ Admin mới truy cập được) */}
-            <Route
-              path="/admin/dashboard"
-              element={
-                <ProtectedRoute requiredRole="Admin">
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Xử lý 404 */}
-            <Route
-              path="*"
-              element={
-                <div style={{ textAlign: 'center', padding: '100px' }}>
-                  <h1>404</h1>
-                  <p>Không tìm thấy trang.</p>
-                </div>
-              }
-            />
-          </Routes>
-        </div>
+          <Route path="*" element={<h1 style={{ textAlign: 'center' }}>404</h1>} />
+        </Routes>
       </main>
 
-      <footer className="app-footer">
-        <div className="footer-inner">
-          <Footer />
-        </div>
-      </footer>
+      {!isAuthPage && <Footer />}
     </div>
   );
 }
