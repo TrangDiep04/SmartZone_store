@@ -3,8 +3,9 @@ package com.smartzone.store.repository;
 import com.smartzone.store.model.CartItems;
 import com.smartzone.store.model.CartItemsId;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
 
-@Repository
 public interface CartItemsRepository extends JpaRepository<CartItems, CartItemsId> {
+    // Spring Data JPA sẽ tự hiểu câu lệnh này
+    List<CartItems> findByCarts_MaGioHang(Integer maGioHang);
 }

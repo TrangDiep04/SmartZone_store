@@ -20,6 +20,18 @@ public class Products {
     @Column(name = "hinhAnh")
     private String image;
 
+    @Column(name = "hinhAnh2")
+    private String image2;
+
+    @Column(name = "hinhAnh3")
+    private String image3;
+
+    @Column(name = "hinhAnh4")
+    private String image4;
+
+    @Column(name = "hinhAnh5")
+    private String image5;
+
     @Column(name = "gia", nullable = false)
     private Long price;
 
@@ -53,6 +65,18 @@ public class Products {
 
     public String getImage() { return image; }
     public void setImage(String image) { this.image = image; }
+
+    public String getImage2() { return image2; }
+    public void setImage2(String image2) { this.image2 = image2; }
+
+    public String getImage3() { return image3; }
+    public void setImage3(String image3) { this.image3 = image3; }
+
+    public String getImage4() { return image4; }
+    public void setImage4(String image4) { this.image4 = image4; }
+
+    public String getImage5() { return image5; }
+    public void setImage5(String image5) { this.image5 = image5; }
 
     public Long getPrice() { return price; }
     public void setPrice(Long price) { this.price = price; }

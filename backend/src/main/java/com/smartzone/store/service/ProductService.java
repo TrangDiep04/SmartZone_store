@@ -54,6 +54,10 @@ public class ProductService {
         existing.setName(product.getName());
         existing.setBrand(product.getBrand());
         existing.setImage(product.getImage());
+        existing.setImage2(product.getImage2());
+        existing.setImage3(product.getImage3());
+        existing.setImage4(product.getImage4());
+        existing.setImage5(product.getImage5());
         existing.setPrice(product.getPrice());
         existing.setDescription(product.getDescription());
         existing.setColor(product.getColor());
