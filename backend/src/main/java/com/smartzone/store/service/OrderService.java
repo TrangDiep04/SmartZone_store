@@ -44,18 +44,18 @@ public class OrderService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + productId));
 
             // Kiểm tra tồn kho
-            if (product.getStock() < itemRequest.getQuantity()) {
+            if (product.getStock() < itemRequest.getSoLuong()) {
                 throw new RuntimeException("Sản phẩm " + product.getName() + " không đủ tồn kho");
             }
 
             // Trừ tồn kho
-            product.setStock(product.getStock() - itemRequest.getQuantity());
+            product.setStock(product.getStock() - itemRequest.getSoLuong());
             productRepository.save(product);
 
             // Tạo OrderItem
             OrderItem item = new OrderItem();
             item.setProduct(product); // liên kết entity
-            item.setQuantity(itemRequest.getQuantity());
+            item.setsoLuong(itemRequest.getSoLuong());
             item.setPrice(itemRequest.getPrice());
             item.setOrder(order);
             return item;

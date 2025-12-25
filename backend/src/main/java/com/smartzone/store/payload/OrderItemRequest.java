@@ -2,7 +2,7 @@ package com.smartzone.store.payload;
 
 public class OrderItemRequest {
     private Integer productId;
-    private int quantity;
+    private int soLuong;
     private int price; // ✅ added price
 
     // Getters and setters
@@ -14,12 +14,12 @@ public class OrderItemRequest {
         this.productId = productId;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public int getSoLuong() {
+        return soLuong;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setSoLuong(int soLuong) {
+        this.soLuong = soLuong;
     }
 
     public int getPrice() {

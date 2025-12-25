@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 type OrderItem = {
-  quantity: number;
+  soLuong: number;
   price: number;
   product: {
     id: number;
@@ -50,10 +50,10 @@ const OrderList: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://localhost:8080/api/orders"); // API trả về danh sách đơn hàng
+        const res = await fetch("http://localhost:8080/api/orders");
         if (!res.ok) throw new Error("Không thể tải đơn hàng");
         const data = await res.json();
-        setOrders(Array.isArray(data) ? data : [data]); // nếu API trả về 1 đơn thì bọc vào mảng
+        setOrders(Array.isArray(data) ? data : [data]);
       } catch (err) {
         setError("Lỗi khi tải đơn hàng");
       } finally {
@@ -113,9 +113,9 @@ const OrderList: React.FC = () => {
                 <p>Giá: {item.product.price.toLocaleString()} đ</p>
               </div>
               <div>
-                <p>Số lượng: {item.quantity}</p>
+                <p>Số lượng: {item.soLuong}</p>
                 <p>
-                  Thành tiền: {(item.price * item.quantity).toLocaleString()} đ
+                  Thành tiền: {(item.price * item.soLuong).toLocaleString()} đ
                 </p>
               </div>
             </div>

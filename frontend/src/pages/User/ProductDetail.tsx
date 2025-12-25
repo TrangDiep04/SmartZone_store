@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { productApi, type Product } from '../../api/productApi';
-import axios from 'axios';
+import { cartApi } from '../../api/cartApi';
+import { Snackbar, Alert } from "@mui/material";
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // Snackbar state
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(false);
@@ -13,7 +19,6 @@ const ProductDetail: React.FC = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [mainImage, setMainImage] = useState<string>("");
   const [soLuong, setsoLuong] = useState<number>(1);
-
 
   const maKhachHang = 16;
 
@@ -41,18 +46,21 @@ const ProductDetail: React.FC = () => {
     if (!product) return;
 
     if (soLuong > product.stock) {
-      alert("Số lượng vượt quá tồn kho, vui lòng chọn ít hơn!");
+      setSnackbarMessage("Số lượng vượt quá tồn kho, vui lòng chọn ít hơn!");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
       return;
     }
 
     try {
-      await axios.post(`/api/cart/${maKhachHang}/add`, {
-        maSanPham: product.id || (product as any).maSanPham,
-        soLuong: soLuong,
-      });
-      alert(`Đã thêm "${product.name}" vào giỏ hàng!`);
+      await cartApi.addToCart(maKhachHang, product.id, soLuong);
+      setSnackbarMessage(`Đã thêm "${product.name}" vào giỏ hàng!`);
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
     } catch (err) {
-      alert("Lỗi khi thêm vào giỏ hàng!");
+      setSnackbarMessage("Lỗi khi thêm vào giỏ hàng!");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
   };
 
@@ -60,11 +68,12 @@ const ProductDetail: React.FC = () => {
     if (!product) return;
 
     if (soLuong > product.stock) {
-      alert("Số lượng vượt quá tồn kho, vui lòng chọn ít hơn!");
+      setSnackbarMessage("Số lượng vượt quá tồn kho, vui lòng chọn ít hơn!");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
       return;
     }
 
-    // Lưu cả thông tin sản phẩm và số lượng
     const checkoutItem = {
       maSanPham: product.id || (product as any).maSanPham,
       tenSanPham: product.name,
@@ -76,7 +85,6 @@ const ProductDetail: React.FC = () => {
     };
 
     localStorage.setItem("checkoutDetail", JSON.stringify([checkoutItem]));
-
     navigate("/order");
   };
 
@@ -144,7 +152,6 @@ const ProductDetail: React.FC = () => {
           <p><strong>Thương hiệu:</strong> {brand}</p>
           <p><strong>Kho:</strong> {stock}</p>
 
-          {/* ✅ chọn số lượng */}
           <div style={{ marginTop: 20 }}>
             <label>Số lượng: </label>
             <input
@@ -214,6 +221,22 @@ const ProductDetail: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* ✅ Snackbar hiển thị thông báo */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

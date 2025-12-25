@@ -38,38 +38,34 @@ const Order: React.FC = () => {
 
   useEffect(() => {
     const checkoutDetail = JSON.parse(localStorage.getItem("checkoutDetail") || "[]");
-
-    // ✅ Nếu có dữ liệu từ ProductDetail (MUA NGAY)
-    if (checkoutDetail.length > 0) {
-      setSelectedItems(checkoutDetail);
-      return;
-    }
-
-    // ✅ Nếu không có thì fallback sang giỏ hàng
     const checkoutIds = JSON.parse(localStorage.getItem("checkout") || "[]");
-    if (!checkoutIds.length) return;
 
-    const loadSelected = async () => {
-      try {
-        const data = await cartApi.getCart(Number(userId));
-        const filtered = data.filter((item: any) =>
-          checkoutIds.includes(item.maSanPham)
-        );
-        const normalized = filtered.map((item: any) => ({
-          maSanPham: item.maSanPham,
-          tenSanPham: item.product?.name,
-          gia: item.product?.price ?? 0,
-          soLuong: item.soLuong,
-          image: item.product?.image,
-          description: item.product?.description,
-        }));
-        setSelectedItems(normalized);
-      } catch (err) {
-        console.error("Lỗi khi load giỏ hàng:", err);
-      }
-    };
-
-    loadSelected();
+    if (checkoutIds.length > 0) {
+      // Nếu có nhiều sản phẩm được chọn từ giỏ hàng
+      const loadSelected = async () => {
+        try {
+          const data = await cartApi.getCart(Number(userId));
+          const filtered = data.filter((item: any) =>
+            checkoutIds.includes(item.maSanPham)
+          );
+          const normalized = filtered.map((item: any) => ({
+            maSanPham: item.maSanPham,
+            tenSanPham: item.product?.name,
+            gia: item.product?.price ?? 0,
+            soLuong: item.soLuong,
+            image: item.product?.image,
+            description: item.product?.description,
+          }));
+          setSelectedItems(normalized);
+        } catch (err) {
+          console.error("Lỗi khi load giỏ hàng:", err);
+        }
+      };
+      loadSelected();
+    } else if (checkoutDetail.length > 0) {
+      // Nếu chỉ có 1 sản phẩm từ "Mua ngay"
+      setSelectedItems(checkoutDetail);
+    }
   }, [userId]);
 
   const total = selectedItems.reduce((s, i) => s + i.gia * i.soLuong, 0);
@@ -136,6 +132,8 @@ const Order: React.FC = () => {
         // ✅ Xoá dữ liệu localStorage
         localStorage.removeItem("checkout");
         localStorage.removeItem("checkoutDetail");
+
+        setSelectedItems([]);
 
         alert("Đặt hàng thành công!");
         navigate("/orders");

@@ -13,7 +13,7 @@ public class OrderItem {
     private Integer id;
 
     @Column(name = "soLuong")
-    private int quantity;
+    private int soLuong;
 
     @Column(name = "gia")
     private int price;
@@ -30,8 +30,8 @@ public class OrderItem {
     public OrderItem() {}
 
     // Getters & Setters
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public int getsoLuong() { return soLuong; }
+    public void setsoLuong(int soLuong) { this.soLuong = soLuong; }
 
     public int getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
