@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { productApi, type Product } from '../../api/productApi';
+import axios from 'axios';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
@@ -11,6 +12,10 @@ const ProductDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [mainImage, setMainImage] = useState<string>("");
+  const [soLuong, setsoLuong] = useState<number>(1);
+
+
+  const maKhachHang = 16;
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -32,48 +37,46 @@ const ProductDetail: React.FC = () => {
     fetchProduct();
   }, [id]);
 
-  const getProductId = (p: Product) => p.id || (p as any).maSanPham;
-
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    const savedCart = localStorage.getItem('cart');
-    const currentCart: Product[] = savedCart ? JSON.parse(savedCart) : [];
-    const productId = getProductId(product);
-    const existingIndex = currentCart.findIndex(
-      (item) => getProductId(item) === productId
-    );
 
-    if (existingIndex !== -1) {
-      currentCart[existingIndex].quantity =
-        (currentCart[existingIndex].quantity || 1) + 1;
-    } else {
-      currentCart.push({ ...product, quantity: 1 });
+    if (soLuong > product.stock) {
+      alert("Số lượng vượt quá tồn kho, vui lòng chọn ít hơn!");
+      return;
     }
 
-    localStorage.setItem('cart', JSON.stringify(currentCart));
-    const productName = product.name || "Sản phẩm";
-    alert(`Đã thêm "${productName}" vào giỏ hàng!`);
-    window.dispatchEvent(new Event("storage"));
+    try {
+      await axios.post(`/api/cart/${maKhachHang}/add`, {
+        maSanPham: product.id || (product as any).maSanPham,
+        soLuong: soLuong,
+      });
+      alert(`Đã thêm "${product.name}" vào giỏ hàng!`);
+    } catch (err) {
+      alert("Lỗi khi thêm vào giỏ hàng!");
+    }
   };
 
   const handleBuyNow = () => {
     if (!product) return;
-    const savedCart = localStorage.getItem('cart');
-    const currentCart: Product[] = savedCart ? JSON.parse(savedCart) : [];
-    const productId = getProductId(product);
-    const existingIndex = currentCart.findIndex(
-      (item) => getProductId(item) === productId
-    );
 
-    if (existingIndex !== -1) {
-      currentCart[existingIndex].quantity =
-        (currentCart[existingIndex].quantity || 1) + 1;
-    } else {
-      currentCart.push({ ...product, quantity: 1 });
+    if (soLuong > product.stock) {
+      alert("Số lượng vượt quá tồn kho, vui lòng chọn ít hơn!");
+      return;
     }
 
-    localStorage.setItem('cart', JSON.stringify(currentCart));
-    localStorage.setItem("selectedIds", JSON.stringify([productId]));
+    // Lưu cả thông tin sản phẩm và số lượng
+    const checkoutItem = {
+      maSanPham: product.id || (product as any).maSanPham,
+      tenSanPham: product.name,
+      gia: product.price,
+      soLuong: soLuong,
+      image: product.image,
+      brand: product.brand,
+      description: product.description,
+    };
+
+    localStorage.setItem("checkoutDetail", JSON.stringify([checkoutItem]));
+
     navigate("/order");
   };
 
@@ -95,7 +98,6 @@ const ProductDetail: React.FC = () => {
       .filter((line) => line.length > 0);
   };
 
-  // Bỏ ảnh nhỏ đầu tiên (image), chỉ lấy 4 ảnh còn lại
   const thumbnails = [image2, image3, image4, image5].filter(Boolean);
 
   return (
@@ -118,7 +120,7 @@ const ProductDetail: React.FC = () => {
                 <img
                   key={index}
                   src={thumb}
-                  alt={`Ảnh ${index + 2}`} // bắt đầu từ ảnh 2
+                  alt={`Ảnh ${index + 2}`}
                   onClick={() => setMainImage(thumb)}
                   style={{
                     width: 80,
@@ -141,6 +143,18 @@ const ProductDetail: React.FC = () => {
           </p>
           <p><strong>Thương hiệu:</strong> {brand}</p>
           <p><strong>Kho:</strong> {stock}</p>
+
+          {/* ✅ chọn số lượng */}
+          <div style={{ marginTop: 20 }}>
+            <label>Số lượng: </label>
+            <input
+              type="number"
+              min={1}
+              value={soLuong}
+              onChange={(e) => setsoLuong(Number(e.target.value))}
+              style={{ width: 80, padding: 5 }}
+            />
+          </div>
 
           <div style={{ display: 'flex', gap: 15, marginTop: 30 }}>
             <button

@@ -6,10 +6,14 @@ import PaymentMethod from "./components/PaymentMethod";
 import OrderSummary from "./components/OrderSummary";
 import { useAddress } from "./hooks/useAddress";
 import { payApi } from "../../../api/payApi";
+import { cartApi } from "../../../api/cartApi";
+import { useAuth } from "../../../context/AuthContext";
 
-const Order = () => {
+const Order: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedItems, setSelectedItems] = useState([]);
+  const { userId } = useAuth();
+
+  const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [showSummary, setShowSummary] = useState(false);
   const [error, setError] = useState("");
@@ -33,12 +37,42 @@ const Order = () => {
   } = useAddress();
 
   useEffect(() => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const selectedIds = JSON.parse(localStorage.getItem("selectedIds") || "[]");
-    setSelectedItems(cart.filter((i) => selectedIds.includes(i.id)));
-  }, []);
+    const checkoutDetail = JSON.parse(localStorage.getItem("checkoutDetail") || "[]");
 
-  const total = selectedItems.reduce((s, i) => s + i.price * i.quantity, 0);
+    // ✅ Nếu có dữ liệu từ ProductDetail (MUA NGAY)
+    if (checkoutDetail.length > 0) {
+      setSelectedItems(checkoutDetail);
+      return;
+    }
+
+    // ✅ Nếu không có thì fallback sang giỏ hàng
+    const checkoutIds = JSON.parse(localStorage.getItem("checkout") || "[]");
+    if (!checkoutIds.length) return;
+
+    const loadSelected = async () => {
+      try {
+        const data = await cartApi.getCart(Number(userId));
+        const filtered = data.filter((item: any) =>
+          checkoutIds.includes(item.maSanPham)
+        );
+        const normalized = filtered.map((item: any) => ({
+          maSanPham: item.maSanPham,
+          tenSanPham: item.product?.name,
+          gia: item.product?.price ?? 0,
+          soLuong: item.soLuong,
+          image: item.product?.image,
+          description: item.product?.description,
+        }));
+        setSelectedItems(normalized);
+      } catch (err) {
+        console.error("Lỗi khi load giỏ hàng:", err);
+      }
+    };
+
+    loadSelected();
+  }, [userId]);
+
+  const total = selectedItems.reduce((s, i) => s + i.gia * i.soLuong, 0);
   const shippingFee = 20000;
   const fullAddress = `${wardName}, ${districtName}, ${provinceName}`;
 
@@ -52,7 +86,6 @@ const Order = () => {
     try {
       const amount = total + shippingFee;
 
-      // ✅ Các phương thức ví điện tử
       if (paymentMethod === "MOMO") {
         const data = await payApi.momoPay(amount);
         window.location.href = data.payUrl;
@@ -71,39 +104,48 @@ const Order = () => {
         return;
       }
 
-      // ✅ Các phương thức không cần redirect (COD, BANK_TRANSFER)
-      if (paymentMethod === "COD" || paymentMethod === "BANK_TRANSFER") {
+      if (paymentMethod === "COD") {
         const orderData = {
           receiverName,
           receiverPhone,
           address: fullAddress,
           paymentMethod,
           shippingFee,
-          items: selectedItems.map((item) => ({
-            productId: item.maSanPham || item.id,
-            quantity: item.quantity,
-            price: item.price
+          items: selectedItems.map(item => ({
+            productId: item.maSanPham,
+            soLuong: item.soLuong,
+            price: item.gia,
           })),
         };
 
         const response = await fetch("http://localhost:8080/api/orders", {
-          method: "GET",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderData),
         });
 
         if (!response.ok) throw new Error("Order failed");
+
+        // ✅ Gọi API xoá sản phẩm khỏi giỏ
+        await fetch(`http://localhost:8080/api/cart/${userId}/removeSelected`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(selectedItems.map(item => item.maSanPham)),
+        });
+
+        // ✅ Xoá dữ liệu localStorage
+        localStorage.removeItem("checkout");
+        localStorage.removeItem("checkoutDetail");
 
         alert("Đặt hàng thành công!");
         navigate("/orders");
         return;
       }
 
-
-      // ✅ Nếu không khớp phương thức nào
       alert("Phương thức thanh toán không hợp lệ.");
     } catch (error) {
       console.error("Lỗi xác nhận đơn hàng:", error);
-      alert("Thanh toán thất bại hoặc lỗi hệ thống.");
+      setError("Thanh toán thất bại hoặc lỗi hệ thống.");
     }
   };
 

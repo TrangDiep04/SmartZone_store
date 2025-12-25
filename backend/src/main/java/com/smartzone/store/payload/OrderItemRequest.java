@@ -1,16 +1,16 @@
 package com.smartzone.store.payload;
 
 public class OrderItemRequest {
-    private Long productId;
+    private Integer productId;
     private int quantity;
     private int price; // ✅ added price
 
     // Getters and setters
-    public Long getProductId() {
+    public Integer getProductId() {
         return productId;
     }
 
-    public void setProductId(Long productId) {
+    public void setProductId(Integer productId) {
         this.productId = productId;
     }
 

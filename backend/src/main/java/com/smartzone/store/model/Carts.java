@@ -1,26 +1,57 @@
 package com.smartzone.store.model;
 
 import javax.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Table(name = "carts") // Tên bảng chính xác trong SQL của bạn
-@Data
+@Table(name = "carts")
 public class Carts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maGioHang;
 
-    @ManyToOne
-    @JoinColumn(name = "maKhachHang", nullable = false)
-    private User user; // Liên kết với bảng users
-
-    @Column(name = "ngayTao")
     private LocalDateTime ngayTao;
 
-    @PrePersist
-    protected void onCreate() {
-        this.ngayTao = LocalDateTime.now();
+    private Integer maKhachHang;
+
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartItems> items;
+
+    // Getters and Setters
+    public Integer getMaGioHang() {
+        return maGioHang;
     }
+
+    public void setMaGioHang(Integer maGioHang) {
+        this.maGioHang = maGioHang;
+    }
+
+    // Getter và Setter cho ngayTao
+    public LocalDateTime getNgayTao() {
+        return ngayTao;
+    }
+
+    public void setNgayTao(LocalDateTime ngayTao) {
+        this.ngayTao = ngayTao;
+    }
+
+    // Getter và Setter cho maKhachHang
+    public Integer getMaKhachHang() {
+        return maKhachHang;
+    }
+
+    public void setMaKhachHang(Integer maKhachHang) {
+        this.maKhachHang = maKhachHang;
+    }
+
+    // Getter và Setter cho items
+    public List<CartItems> getItems() {
+        return items;
+    }
+
+    public void setItems(List<CartItems> items) {
+        this.items = items;
+    }
+
 }

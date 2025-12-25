@@ -1,35 +1,46 @@
 package com.smartzone.store.model;
 
 import javax.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "cart_items")
-@Data
+@IdClass(CartItemLd.class)
 public class CartItems {
+    @Id
+    private Integer maGioHang;
 
-    @EmbeddedId
-    private CartItemsId id;
+    @Id
+    private Integer maSanPham;
 
-    @ManyToOne
-    @MapsId("maGioHang")
-    @JoinColumn(name = "maGioHang")
-    private Carts carts;
-
-    @ManyToOne
-    @MapsId("maSanPham")
-    @JoinColumn(name = "maSanPham")
-    private Products products; // Phải là Products (có s) để khớp với file bạn gửi
-
-    @Column(name = "soLuong")
+    private LocalDateTime ngayThem;
     private Integer soLuong;
 
-    @Column(name = "ngayThem")
-    private LocalDateTime ngayThem;
+    @ManyToOne
+    @JoinColumn(name = "maGioHang", insertable = false, updatable = false)
+    private Carts cart;
 
-    @PrePersist
-    protected void onCreate() {
-        this.ngayThem = LocalDateTime.now();
-    }
+    // Thêm quan hệ tới Products
+    @ManyToOne
+    @JoinColumn(name = "maSanPham", insertable = false, updatable = false)
+    private Products product;
+
+    // Getters & Setters
+    public Integer getMaGioHang() { return maGioHang; }
+    public void setMaGioHang(Integer maGioHang) { this.maGioHang = maGioHang; }
+
+    public Integer getMaSanPham() { return maSanPham; }
+    public void setMaSanPham(Integer maSanPham) { this.maSanPham = maSanPham; }
+
+    public LocalDateTime getNgayThem() { return ngayThem; }
+    public void setNgayThem(LocalDateTime ngayThem) { this.ngayThem = ngayThem; }
+
+    public Integer getSoLuong() { return soLuong; }
+    public void setSoLuong(Integer soLuong) { this.soLuong = soLuong; }
+
+//    public Carts getCart() { return cart; }
+//    public void setCart(Carts cart) { this.cart = cart; }
+
+    public Products getProduct() { return product; }
+    public void setProduct(Products product) { this.product = product; }
 }

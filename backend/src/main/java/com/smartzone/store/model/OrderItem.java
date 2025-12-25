@@ -10,10 +10,7 @@ public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "maSanPham")
-    private Long productId;
+    private Integer id;
 
     @Column(name = "soLuong")
     private int quantity;
@@ -23,16 +20,16 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "maDonHang")
-    @JsonIgnore // ✅ tránh vòng lặp JSON khi trả về Order
+    @JsonIgnore
     private Order order;
+
+    @ManyToOne
+    @JoinColumn(name = "maSanPham") // Khớp với tên cột trong DB
+    private Products product;
 
     public OrderItem() {}
 
-
     // Getters & Setters
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
-
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
@@ -41,4 +38,7 @@ public class OrderItem {
 
     public Order getOrder() { return order; }
     public void setOrder(Order order) { this.order = order; }
+
+    public Products getProduct() { return product; }
+    public void setProduct(Products product) { this.product = product; }
 }

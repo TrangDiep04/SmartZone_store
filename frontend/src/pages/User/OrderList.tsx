@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-interface OrderItem {
-  id: number;
-  productId: number;
+type OrderItem = {
   quantity: number;
   price: number;
-}
+  product: {
+    id: number;
+    name: string;
+    brand: string;
+    image: string;
+    price: number;
+  };
+};
 
-interface Order {
+type Order = {
   id: number;
   receiverName: string;
   receiverPhone: string;
@@ -15,66 +20,110 @@ interface Order {
   paymentMethod: string;
   shippingFee: number;
   status: string;
+  createdAt: string;
+  updatedAt: string;
   items: OrderItem[];
-}
+};
 
-export default function OrderList() {
+const getPaymentText = (method: string) => {
+  switch (method) {
+    case "COD":
+      return "Thanh toán khi nhận hàng";
+    case "MOMO":
+      return "Ví MOMO";
+    case "VNPAY":
+      return "Ví VNPAY";
+    case "ZALOPAY":
+      return "Ví ZaloPay";
+    default:
+      return method;
+  }
+};
+
+const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await fetch("http://localhost:8080/api/orders");
-        const data = await response.json();
-        setOrders(data);
-      } catch (error) {
-        console.error("Lỗi tải danh sách đơn hàng:", error);
+        const res = await fetch("http://localhost:8080/api/orders"); // API trả về danh sách đơn hàng
+        if (!res.ok) throw new Error("Không thể tải đơn hàng");
+        const data = await res.json();
+        setOrders(Array.isArray(data) ? data : [data]); // nếu API trả về 1 đơn thì bọc vào mảng
+      } catch (err) {
+        setError("Lỗi khi tải đơn hàng");
       } finally {
         setLoading(false);
       }
     };
-
     fetchOrders();
   }, []);
 
-  if (loading) return <p>Đang tải đơn hàng...</p>;
+  if (loading) return <div style={{ padding: 20 }}>Đang tải...</div>;
+  if (error) return <div style={{ padding: 20, color: "red" }}>{error}</div>;
+  if (!orders.length) return <div style={{ padding: 20 }}>Không có đơn hàng nào</div>;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Danh sách đơn hàng đã đặt</h2>
-
-      {orders.length === 0 && <p>Bạn chưa có đơn hàng nào.</p>}
-
-      {(orders || []).map((order) => (
+    <div style={{ padding: 30, maxWidth: 1000, margin: "0 auto" }}>
+      <h2>Danh sách đơn hàng</h2>
+      {orders.map((order) => (
         <div
           key={order.id}
           style={{
-            border: "1px solid #ccc",
-            padding: "15px",
-            marginBottom: "20px",
-            borderRadius: "8px",
+            border: "1px solid #ddd",
+            borderRadius: 8,
+            padding: 20,
+            marginBottom: 20,
+            background: "#fff",
           }}
         >
           <h3>Đơn hàng #{order.id}</h3>
           <p><strong>Người nhận:</strong> {order.receiverName}</p>
           <p><strong>SĐT:</strong> {order.receiverPhone}</p>
           <p><strong>Địa chỉ:</strong> {order.address}</p>
-          <p><strong>Phương thức thanh toán:</strong> {order.paymentMethod}</p>
+          <p><strong>Phương thức thanh toán:</strong> {getPaymentText(order.paymentMethod)}</p>
           <p><strong>Phí vận chuyển:</strong> {order.shippingFee.toLocaleString()} đ</p>
           <p><strong>Trạng thái:</strong> {order.status}</p>
+          <p><strong>Ngày tạo:</strong> {new Date(order.createdAt).toLocaleString()}</p>
 
           <h4>Sản phẩm:</h4>
-          <ul>
-            {order.items.map((item) => (
-              <li key={item.id}>
-                Mã SP: {item.productId} — SL: {item.quantity} — Giá:{" "}
-                {item.price.toLocaleString()} đ
-              </li>
-            ))}
-          </ul>
+          {order.items.map((item, idx) => (
+            <div
+              key={idx}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 15,
+                borderBottom: "1px solid #eee",
+                padding: "10px 0",
+              }}
+            >
+              <img
+                src={item.product.image}
+                alt={item.product.name}
+                style={{ width: 80, height: 80, objectFit: "contain" }}
+              />
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: "bold" }}>{item.product.name}</p>
+                <p>Thương hiệu: {item.product.brand}</p>
+                <p>Giá: {item.product.price.toLocaleString()} đ</p>
+              </div>
+              <div>
+                <p>Số lượng: {item.quantity}</p>
+                <p>
+                  Thành tiền: {(item.price * item.quantity).toLocaleString()} đ
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       ))}
     </div>
   );
-}
+};
+
+export default OrderList;

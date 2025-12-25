@@ -7,7 +7,6 @@ const PaymentMethod = ({ paymentMethod, setPaymentMethod }) => (
       <option value="MOMO">MOMO</option>
       <option value="VNPAY">VNPAY</option>
       <option value="ZALOPAY">ZaloPay</option>
-      <option value="BANK_TRANSFER">Chuyển khoản</option>
     </select>
   </div>
 );

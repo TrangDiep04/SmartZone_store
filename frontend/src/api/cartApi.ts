@@ -16,9 +16,9 @@ export const cartApi = {
     return response.data;
   },
   addToCart: async (maKhachHang: number, maSanPham: number, soLuong: number) => {
-    return (await axios.post(`${BASE_URL}/add`, { maKhachHang, maSanPham, soLuong })).data;
+    return (await axios.post(`${BASE_URL}/${maKhachHang}/add`, { maSanPham, soLuong })).data;
   },
   removeFromCart: async (maKhachHang: number, maSanPham: number) => {
-    return (await axios.delete(`${BASE_URL}/remove`, { params: { maKhachHang, maSanPham } })).data;
+    return (await axios.delete(`${BASE_URL}/${maKhachHang}/remove/${maSanPham}`)).data;
   }
 };

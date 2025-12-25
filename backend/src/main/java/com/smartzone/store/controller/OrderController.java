@@ -3,7 +3,10 @@ package com.smartzone.store.controller;
 import com.smartzone.store.model.Order;
 import com.smartzone.store.payload.OrderRequest;
 import com.smartzone.store.service.OrderService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -16,17 +19,21 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // 1. Dùng để tạo đơn hàng (Sửa lỗi 500)
+    // ✅ Tạo đơn hàng và trừ tồn kho
     @PostMapping
-    public Order createOrder(@RequestBody OrderRequest request) {
-        // Hãy chắc chắn OrderService đã xử lý việc gán 'price' vào OrderItem
-        return orderService.createOrder(request);
+    public ResponseEntity<?> createOrder(@RequestBody OrderRequest request) {
+        try {
+            Order order = orderService.createOrder(request);
+            return ResponseEntity.ok(order);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Lỗi khi tạo đơn hàng: " + e.getMessage());
+        }
     }
 
-    // 2. Bổ sung phương thức này để sửa lỗi 405 và lỗi ".map() is not a function"
+    // ✅ Lấy danh sách đơn hàng
     @GetMapping
-    public java.util.List<Order> getAllOrders() {
-        return orderService.getAllOrders();
-        // Bạn cần thêm hàm getAllOrders() vào OrderService và gọi repo.findAll()
+    public ResponseEntity<List<Order>> getAllOrders() {
+        List<Order> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
     }
 }
