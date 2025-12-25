@@ -28,7 +28,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (tenDangNhap: string, matKhau: string): Promise<string> => {
     try {
       const data: LoginResponse = await authService.login(tenDangNhap, matKhau);
-      const role = data.phanQuyen; // Ví dụ: "Admin" hoặc "User"
+     // const role = data.phanQuyen; // Ví dụ: "Admin" hoặc "User"
+     //them cai nay
+     const roleMap: Record<string, string> = {
+         'admin': 'Admin',
+         'user': 'User'
+       };
+       const rawRole = (data.vaiTro || 'user').toLowerCase(); // lowercase để map
+       const role = roleMap[rawRole] || 'User';
+
+     //const rawRole = data.phanQuyen || "User";  // backend trả gì lấy đó, default User
+    // const role = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
       const displayName = data.hoTen || data.tenDangNhap || "Thành viên";
       const uId = String(data.maKhachHang || data.id);
 
@@ -43,7 +53,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUserRole(role);
       setUserName(displayName);
       setUserId(uId);
-
+       console.log('Login response data:', data);
+       console.log('Parsed role:', role);
       return role;
     } catch (error) {
       console.error("Login Error:", error);

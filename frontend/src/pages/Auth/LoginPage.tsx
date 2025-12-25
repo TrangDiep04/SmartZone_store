@@ -21,11 +21,10 @@ const LoginPage: React.FC = () => {
     try {
       // Đảm bảo hàm login trong AuthContext trả về giá trị string (Admin/User)
       const role = await login(tenDangNhap, matKhau);
-
-      if (role === "Admin") {
-        navigate("/admin/dashboard", { replace: true });
+      if (role === 'Admin') {
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        navigate("/user/dashboard", { replace: true });
+        navigate('/user/dashboard', { replace: true });
       }
     } catch (err: any) {
       setError(err.response?.data?.message || "Tên đăng nhập hoặc mật khẩu không đúng.");
