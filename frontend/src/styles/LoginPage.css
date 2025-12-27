@@ -1,153 +1,112 @@
-body {
+.auth-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #dce9f6; /* Màu nền cho toàn bộ trang */
+    min-height: 100vh;
+    background: linear-gradient(135deg, #dce9f6 0%, #ffffff 100%);
 }
 
 .auth-container {
-    max-width: 350px; /* Tăng chiều rộng của container */
-    margin: auto;
-    padding: 55px; /* Tăng đệm bên trong */
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    background-color: #fbfbfb; /* Màu nền cho container */
-    text-align: center; /* Căn giữa văn bản */
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
+    border-radius: 15px;
+    background: #ffffff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    text-align: center;
 }
 
-.logo {
-    width: 80px; /* Kích thước logo */
-    margin-bottom: 0px;
+.logo-box img {
+    width: 70px;
+    margin-bottom: 15px;
 }
-.logo-container {
-    margin-bottom: 0px; /* Khoảng cách dưới logo */
-}
-
 
 h2 {
-    color: #010438;
-    margin-bottom: 20px;
+    color: #1a1a1a;
+    margin-bottom: 5px;
+    font-size: 1.5rem;
 }
 
-.login-form,
-.register-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Căn giữa các trường */
-}
-
-.input-field {
-    width: 100%;  /* Sử dụng tỷ lệ để đảm bảo cân đối */
-    max-width: 200px; /* Giới hạn chiều rộng tối đa của trường */
-    margin-bottom: 10px; /* Khoảng cách giữa các trường */
-}
-
-input {
-    width: 100%; /* Chiếm toàn bộ chiều rộng của phần tử cha */
-    padding: 10px; /* Đệm bên trong lớn hơn */
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 0.85rem; /* Kích thước chữ lớn hơn */
-}
-
-input:focus {
-    border-color: #66afe9; /* Màu viền khi focus */
-    outline: none; /* Bỏ viền khi focus */
-}
-
-.error-message {
-    color: red;
+.subtitle {
+    color: #888;
     font-size: 0.9rem;
-    margin-bottom: 10px;
+    margin-bottom: 25px;
+}
+
+.input-group {
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 40px 12px 45px; /* Chừa chỗ cho icon và nút mắt */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.input-group input:focus {
+    border-color: #007bff;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: #888;
+    cursor: pointer;
+}
+
+.form-options {
+    text-align: right;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.form-options a {
+    font-size: 0.85rem;
+    color: #007bff;
+    text-decoration: none;
 }
 
 .submit-button {
-    padding: 10px; /* Tăng kích thước nút */
-    margin-top: 10px;
+    width: 100%;
+    padding: 12px;
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-weight: 600;
     cursor: pointer;
-    font-size: 0.85 rem; /* Kích thước chữ lớn hơn */
-    width: 100%; /* Chiếm toàn bộ chiều rộng */
-    max-width: 170px; /* Chiều rộng tối đa cho nút bấm */
-    transition: background-color 0.3s; /* Hiệu ứng chuyển màu khi hover */
+    transition: 0.3s;
 }
 
 .submit-button:hover {
-    background-color: #4c68f3; /* Màu nền khi hover */
+    background-color: #0056b3;
 }
 
-.gender-box {
-    display: flex;
-    flex-direction: column; /* label on top */
-    margin-bottom: 3px; /* match other fields */
-    padding: 8px 10px; /* similar padding to inputs */
-    border: 1px solid #ccc; /* same border as inputs */
-    border-radius: 5px; /* rounded corners */
-    background: #ffff; /* white box */
-    box-sizing: border-box;
-    max-width: 200px;
-    width: 100%;
-    font-size: 0.85rem; /* requested font size */
-    color: #f7f6f0; /* ivory / trắng ngà for text inside */
-}
-
-/* Make the "Giới tính:" label use the requested color and override box color */
-.gender-box > label {
-    color: #776e6e;
+.error-message {
+    color: #d9534f;
+    background: #fdf7f7;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
     font-size: 0.85rem;
-}
-
-.gender-options {
-    display: flex; /* horizontal layout */
-    gap: 12px; /* reduced spacing between Nam and Nữ */
-    justify-content: flex-start; /* align left within box */
-    align-items: center;
-}
-
-.radio-label {
-    display: flex;
-    align-items: center; /* vertical align */
-    cursor: pointer; /* pointer on hover */
-    gap: 5px;
-    padding: 6px 6px;
-    background: transparent;
-    color: #7b6161; /* option text darker for readability */
-    border-radius: 4px;
-}
-
-.radio-label input[type="radio"] {
-    width: 13px;
-    height: 13px;
-}
-/* Bao bọc input và icon/button */
-.password-input-container {
-    position: relative; /* Rất quan trọng để định vị nút toggle */
-}
-
-/* Định vị nút toggle (biểu tượng mắt) */
-.password-toggle {
-    position: absolute;
-    top: 50%; 
-    right: 10px; 
-    transform: translateY(-50%); 
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    font-size: 1.1rem; /* Kích thước icon Font Awesome */
-    color: #888; /* Màu sắc nhẹ nhàng */
-    line-height: 1;
-    z-index: 10;
-}
-
-/* Đảm bảo input có đủ padding bên phải */
-.password-input-container input {
-    padding-right: 40px; 
-    width: 100%; 
-    box-sizing: border-box;
 }

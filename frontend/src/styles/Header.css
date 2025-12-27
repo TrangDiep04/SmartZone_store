@@ -124,16 +124,16 @@
     line-height: 1.2;
 }
 
-.greeting { 
-    font-size: 0.65rem; 
-    color: #888; 
-    text-transform: uppercase; 
+.greeting {
+    font-size: 0.65rem;
+    color: #888;
+    text-transform: uppercase;
 }
 
-.display-name { 
-    font-weight: 700; 
-    color: #007bff; 
-    font-size: 0.95rem; 
+.display-name {
+    font-weight: 700;
+    color: #007bff;
+    font-size: 0.95rem;
     white-space: nowrap; /* Ngăn không cho tên bị xuống hàng */
 }
 

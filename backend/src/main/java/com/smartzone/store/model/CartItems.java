@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "cart_items")
-@IdClass(CartItemLd.class)
+@IdClass(CartItemId.class)
 public class CartItems {
     @Id
     private Integer maGioHang;

@@ -2,7 +2,7 @@ package com.smartzone.store.service;
 
 import com.smartzone.store.model.Carts;
 import com.smartzone.store.model.CartItems;
-import com.smartzone.store.model.CartItemLd;
+import com.smartzone.store.model.CartItemId;
 import com.smartzone.store.repository.CartRepository;
 import com.smartzone.store.repository.CartItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class CartService {
                     return cartRepo.save(newCart);
                 });
 
-        CartItemLd id = new CartItemLd(cart.getMaGioHang(), maSanPham);
+        CartItemId id = new CartItemId(cart.getMaGioHang(), maSanPham);
 
         CartItems item = itemRepo.findById(id).orElseGet(() -> {
             CartItems newItem = new CartItems();

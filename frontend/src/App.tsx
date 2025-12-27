@@ -12,6 +12,7 @@ import Orders from './pages/User/OrderList';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import Snowfall from './components/UI/Snowfall'; // <— Thêm dòng này
 import './App.css';
+import ForgotPasswordPage from './pages/Auth/ForgotPassword';
 
 function App() {
   const location = useLocation();
@@ -39,6 +40,7 @@ function App() {
           <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           <Route
             path="/admin/dashboard"

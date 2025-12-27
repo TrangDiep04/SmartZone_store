@@ -307,7 +307,7 @@ const Cart: React.FC = () => {
               }}
               onClick={handleCheckout}
             >
-              MUA HÀNG
+              ĐẶT HÀNG
             </Button>
           </Box>
         </>
